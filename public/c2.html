@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>C2 미래자아 편지</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Pretendard:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      background-color: #f0f2f5;
+      font-family: 'Pretendard', system-ui, sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* 상단 컨트롤 패널 */
+    .controls {
+      background: white;
+      padding: 16px 24px;
+      border-radius: 50px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .choice-group { display: flex; gap: 15px; align-items: center; }
+    label { cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+
+    button {
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-gen { background: #111; color: white; }
+    .btn-gen:hover { background: #333; transform: translateY(-1px); }
+    .btn-gen:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* 편지지 디자인 */
+    .letter-paper {
+      background: #fff;
+      width: 100%;
+      max-width: 800px;
+      min-height: 600px;
+      padding: 70px;
+      border-radius: 4px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      position: relative;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .letter-to {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.3rem; font-weight: 700; color: #222;
+      margin-bottom: 40px; text-align: left;
+      border-bottom: 2px solid #eee; padding-bottom: 15px; width: 100%;
+    }
+
+    .letter-body {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.15rem; line-height: 1.9; color: #444;
+      white-space: pre-wrap; flex-grow: 1; margin-bottom: 30px;
+    }
+
+    /* ✅ 안전수칙 박스 추가 */
+    .rules-box {
+      margin: 20px 0;
+      padding: 25px;
+      background-color: #fdfdfd;
+      border: 1px dashed #ccc;
+      border-left: 5px solid #d32f2f;
+      font-family: 'Pretendard', sans-serif;
+      border-radius: 4px;
+    }
+    .rules-box h3 {
+      margin-top: 0; color: #d32f2f; font-size: 1.1rem; margin-bottom: 15px;
+    }
+
+    .letter-from {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.3rem; font-weight: 700; color: #222;
+      text-align: right; margin-top: 30px;
+    }
+    
+    /* ✅ 다음 단계 버튼 */
+    .action-area {
+      margin-top: 40px;
+      display: none; /* 생성 완료 전까지 숨김 */
+    }
+    .btn-next {
+      background: #d32f2f; color: white; padding: 15px 40px;
+      font-size: 1.1rem; border-radius: 30px;
+    }
+    .btn-next:hover { background: #b71c1c; }
+
+    .loading-overlay {
+      display: none; text-align: center; color: #888;
+      font-size: 1rem; margin-top: 20px; font-family: 'Noto Serif KR', serif;
+    }
+
+    @media (max-width: 600px) {
+      .letter-paper { padding: 30px; }
+      .letter-to, .letter-from { font-size: 1.1rem; }
+      .letter-body { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="controls">
+    <div class="choice-group">
+      <label><input type="radio" name="branch" value="Stop" checked> 🛑 멈췄다면 (Stop)</label>
+      <label><input type="radio" name="branch" value="Go"> ⚠️ 강행했다면 (Go)</label>
+    </div>
+    <button class="btn-gen" id="gen">편지 생성하기</button>
+  </div>
+
+  <div class="letter-paper">
+    <div class="letter-to" id="to-area">To. 현재의 나에게</div>
+    
+    <div class="letter-body" id="out">
+      (상단 '생성하기' 버튼을 누르면 3년 후의 내가 쓴 편지가 도착합니다.)
+    </div>
+    
+    <div id="rules-area"></div>
+
+    <div class="loading-overlay" id="loading">
+      ✍️ 미래에서 편지를 적어 내려가는 중...
+    </div>
+
+    <div class="letter-from" id="from-area">From. 3년 후의 내가</div>
+  </div>
+
+  <div class="action-area" id="action-area">
+    <button class="btn-next" onclick="window.location.href='post-survey.html'">사후 설문 진행하기 →</button>
+  </div>
+
+  <script>
+    const genBtn = document.getElementById("gen");
+    const outEl = document.getElementById("out");
+    const loadingEl = document.getElementById("loading");
+    const rulesArea = document.getElementById("rules-area");
+    const actionArea = document.getElementById("action-area");
+    const toArea = document.getElementById("to-area");
+    const fromArea = document.getElementById("from-area");
+
+    genBtn.addEventListener("click", async () => {
+      const branch = document.querySelector('input[name="branch"]:checked').value;
+      localStorage.setItem("branchChoice", branch); // 선택값 저장
+
+      // 초기화
+      genBtn.disabled = true;
+      outEl.style.display = "none";
+      rulesArea.innerHTML = "";
+      actionArea.style.display = "none";
+      loadingEl.style.display = "block";
+
+      try {
+        const raw = localStorage.getItem("preSurveyResult");
+        if (!raw) throw new Error("설문 데이터가 없습니다.");
+        const survey = JSON.parse(raw);
+
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            condition: "C2",
+            payload: survey.data,
+            scenarioId: survey.scenarioId,
+            branchChoice: branch
+          })
+        });
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+
+        // 텍스트 처리
+        const name = survey.data.name || "나";
+        toArea.innerText = `To. 현재의 ${name}에게`;
+        fromArea.innerText = `From. 3년 후의 ${name}이가`;
+
+        const fullText = data.text.trim();
+        // 1. 숫자로 시작하는 수칙 부분 분리 (정규식)
+        const rulesMatch = fullText.match(/(1\..+)/s);
+
+        if (rulesMatch) {
+          const mainContent = fullText.split(rulesMatch[0])[0].trim();
+          const rulesContent = rulesMatch[0].trim();
+
+          outEl.innerText = mainContent;
+          rulesArea.innerHTML = `
+            <div class="rules-box">
+              <h3>🛡️ 미래의 내가 당부하는 3대 안전수칙</h3>
+              <div style="line-height:1.8; color:#333;">${rulesContent.replace(/\n/g, '<br>')}</div>
+            </div>
+          `;
+        } else {
+          outEl.innerText = fullText;
+        }
+
+        outEl.style.display = "block";
+        actionArea.style.display = "block"; // 버튼 표시
+
+      } catch (e) {
+        alert("오류: " + e.message);
+        outEl.style.display = "block";
+        outEl.innerText = "편지를 가져오는 데 실패했습니다.";
+      } finally {
+        loadingEl.style.display = "none";
+        genBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

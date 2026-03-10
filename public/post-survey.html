@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>경험 사후 설문 (POST)</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #f2f4f7; font-family: sans-serif; display: flex; justify-content: center; }
+    .mobile-frame { width: 100%; max-width: 600px; background: #fff; min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 24px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 10; }
+    header h1 { margin: 0; font-size: 1.3rem; color: #333; }
+    .content { padding: 20px; flex: 1; }
+    
+    .section-title { font-size: 1.1rem; font-weight: bold; margin: 30px 0 15px; padding-left: 10px; border-left: 4px solid #ffeb3b; color: #1a1a1a; }
+    .question-card { background: #f8f9fa; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #eee; }
+    .question-text { font-size: 1rem; color: #333; margin-bottom: 15px; line-height: 1.5; font-weight: 500; }
+
+    .scale-wrapper { display: flex; justify-content: space-between; align-items: flex-end; gap: 2px; margin-top: 10px; }
+    .scale-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+    .scale-item input { display: none; }
+    
+    .scale-num {
+      width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ddd;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff; font-weight: bold; transition: all 0.2s; color: #666; font-size: 0.9rem;
+    }
+    .scale-item input:checked + .scale-num {
+      background: #333; color: #fff; border-color: #333; transform: scale(1.1);
+    }
+    .scale-label { font-size: 0.65rem; color: #999; margin-bottom: 6px; text-align: center; height: 14px; white-space: nowrap; }
+
+    textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none; box-sizing: border-box; font-family: inherit; margin-top: 8px; font-size: 0.95rem; }
+    .sub-info { font-size: 0.85rem; color: #777; margin-top: -10px; margin-bottom: 10px; padding-left: 5px; }
+
+    footer { padding: 20px; border-top: 1px solid #eee; background: #fff; }
+    .submit-btn { width: 100%; background: #333; color: #fff; border: none; padding: 18px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+    .submit-btn:disabled { background: #ccc; }
+  </style>
+</head>
+<body>
+  <div class="mobile-frame">
+    <header>
+      <h1>경험 사후 설문</h1>
+      <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">본 연구를 위해 모든 문항에 솔직하게 응답해 주세요.</p>
+    </header>
+
+    <div class="content">
+      <div class="section-title">1. 콘텐츠 경험 품질 (5점)</div>
+      <div id="q-p1-1" class="question-card"></div>
+      <div id="q-p1-2" class="question-card"></div>
+      <div id="q-p1-3" class="question-card"></div>
+      <div id="q-p2-1" class="question-card"></div>
+      <div id="q-p2-2" class="question-card"></div>
+      <div id="q-p2-3" class="question-card"></div>
+      <div id="q-p2-4" class="question-card"></div>
+
+      <div class="section-title">2. 사후 위험지각 인식 (7점)</div>
+      <div id="q-r1" class="question-card"></div>
+      <div id="q-r2" class="question-card"></div>
+      <div id="q-r3" class="question-card"></div>
+
+      <div class="section-title">3. 감정 반응 확인 (7점)</div>
+      <div id="q-d1" class="question-card"></div>
+      <div id="q-d2" class="question-card"></div>
+
+      <div class="section-title">4. POST 인터뷰</div>
+      <div class="question-card">
+        <div class="question-text">Q1. 현장에서 위험을 알아도 그냥 진행하게 되는 이유가 대부분 뭐라고 생각하시나요?</div>
+        <div class="sub-info">(시간압박/상사/관행/자신감/귀찮음/작업중단 부담/소통 부재 등) [cite: 23]</div>
+        <textarea id="int_1" placeholder="의견을 입력해 주세요..."></textarea>
+      </div>
+      <div class="question-card">
+        <div class="question-text">Q2. 방금 본 콘텐츠에서 가장 기억에 남는 장면/문장은 무엇인가요? [cite: 23]</div>
+        <textarea id="int_2" placeholder="의견을 입력해 주세요..."></textarea>
+      </div>
+      <div class="question-card">
+        <div class="question-text">Q3. 그 장면을 볼 때 어떤 감정이 들었나요? [cite: 23]</div>
+        <textarea id="int_3" placeholder="의견을 입력해 주세요..."></textarea>
+      </div>
+      <div class="question-card">
+        <div class="question-text">Q4. 본인 상황과 연결된 부분이 있었나요? [cite: 23]</div>
+        <textarea id="int_4" placeholder="의견을 입력해 주세요..."></textarea>
+      </div>
+      <div class="question-card">
+        <div class="question-text">Q5. 경각심을 느끼게 했나요? [cite: 23]</div>
+        <textarea id="int_5" placeholder="의견을 입력해 주세요..."></textarea>
+      </div>
+      <div class="question-card">
+        <div class="question-text">Q6. 어떤 요소가 경각심을 만들었나요? [cite: 23]</div>
+        <textarea id="int_6" placeholder="의견을 입력해 주세요..."></textarea>
+      </div>
+      <div class="question-card">
+        <div class="question-text">Q7. 사고 손실이 실감나게 느껴졌나요? [cite: 23]</div>
+        <textarea id="int_7" placeholder="의견을 입력해 주세요..."></textarea>
+      </div>
+      <div class="question-card">
+        <div class="question-text">Q8. 앞으로 작업 중에 내용이 떠오를 것 같나요? [cite: 23]</div>
+        <textarea id="int_8" placeholder="의견을 입력해 주세요..."></textarea>
+      </div>
+      <div class="question-card">
+        <div class="question-text">Q9. 안전수칙 준수 의지에 차이가 있나요? [cite: 23]</div>
+        <textarea id="int_9" placeholder="의견을 입력해 주세요..."></textarea>
+      </div>
+    </div>
+
+    <footer>
+      <button class="submit-btn" id="save-btn" onclick="savePostSurvey()">설문 제출 및 종료</button>
+    </footer>
+  </div>
+
+  <script>
+    function createScaleHtml(id, text, max) {
+      let html = `<div class="question-text">${text}</div><div class="scale-wrapper">`;
+      for (let i = 1; i <= max; i++) {
+        const label = (i === 1) ? '전혀 아니다' : (i === max) ? '매우 그렇다' : '';
+        html += `
+          <label class="scale-item">
+            <span class="scale-label">${label}</span>
+            <input type="radio" name="${id}" value="${i}">
+            <div class="scale-num">${i}</div>
+          </label>`;
+      }
+      html += `</div>`;
+      return html;
+    }
+
+    // 문항 렌더링 [cite: 17, 19, 21]
+    document.getElementById('q-p1-1').innerHTML = createScaleHtml('P1_1', 'P1-1. 콘텐츠 경험에 정신적으로 몰입했다고 느꼈다.', 5);
+    document.getElementById('q-p1-2').innerHTML = createScaleHtml('P1_2', 'P1-2. 이 경험은 매우 흥미로웠다.', 5);
+    document.getElementById('q-p1-3').innerHTML = createScaleHtml('P1_3', 'P1-3. 이 경험은 나를 완전히 몰입시키며 집중하게 했다.', 5);
+    document.getElementById('q-p2-1').innerHTML = createScaleHtml('P2_1', 'P2-1. 이 콘텐츠가 내 상황/내 작업(현장)에 대해 생각하게 만들었다.', 5);
+    document.getElementById('q-p2-2').innerHTML = createScaleHtml('P2_2', 'P2-2. 콘텐츠 속 일이 실제로 일어난다면 어떨지 생각해 보았는가?', 5);
+    document.getElementById('q-p2-3').innerHTML = createScaleHtml('P2_3', 'P2-3. 이 콘텐츠가 나 개인과 관련 있다고 느꼈는가?', 5);
+    document.getElementById('q-p2-4').innerHTML = createScaleHtml('P2_4', 'P2-4. 콘텐츠를 보면서 내 경험이 떠올랐는가?', 5);
+    document.getElementById('q-r1').innerHTML = createScaleHtml('R1', 'R1. 건설현장 사고의 피해는 대체로 매우 심각하다고 생각한다.', 7);
+    document.getElementById('q-r2').innerHTML = createScaleHtml('R2', 'R2. 나는 건설현장에서 사고를 겪을 가능성이 있다고 생각한다.', 7);
+    document.getElementById('q-r3').innerHTML = createScaleHtml('R3', 'R3. 건설현장에서의 업무는 위험이 크다고 느낀다.', 7);
+    document.getElementById('q-d1').innerHTML = createScaleHtml('D1', 'D1. 콘텐츠가 불편하거나 불쾌하게 느껴졌다.', 7);
+    document.getElementById('q-d2').innerHTML = createScaleHtml('D2', 'D2. 콘텐츠를 본 뒤에도 감정이 남아 있다.', 7);
+
+    async function savePostSurvey() {
+      const btn = document.getElementById('save-btn');
+      const answers = {};
+      const scaleQuestions = ['P1_1', 'P1_2', 'P1_3', 'P2_1', 'P2_2', 'P2_3', 'P2_4', 'R1', 'R2', 'R3', 'D1', 'D2'];
+      
+      for (const q of scaleQuestions) {
+        const selected = document.querySelector(`input[name="${q}"]:checked`);
+        if (!selected) { alert('모든 선택 문항에 응답해 주세요.'); return; }
+        answers[q] = selected.value;
+      }
+      for(let i=1; i<=9; i++) {
+        answers[`interview_${i}`] = document.getElementById(`int_${i}`).value;
+      }
+
+      // 로컬스토리지 데이터 안전하게 파싱
+      let preData = {};
+      try {
+        preData = JSON.parse(localStorage.getItem("preSurveyResult") || "{}");
+      } catch(e) { console.error("데이터 로드 실패"); }
+
+      const name = preData.data?.profile?.name || "Unknown";
+      const org = preData.data?.profile?.org || "None";
+
+      const payload = {
+        name, org,
+        surveyType: "POST_SURVEY",
+        data: answers,
+        timestamp: new Date().toISOString()
+      };
+
+      btn.disabled = true;
+      btn.textContent = "저장 중...";
+
+      try {
+        const res = await fetch('/api/submit-post-survey', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        // ✅ 서버 응답 타입 확인 (핵심 해결 부분)
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const result = await res.json();
+          if (result.ok) {
+            alert(`설문 완료! 파일이 저장되었습니다: ${result.filename}`);
+            window.location.href = '/';
+          } else {
+            throw new Error(result.error || "서버에서 저장을 거절했습니다.");
+          }
+        } else {
+          // 서버가 HTML(404 등)을 보낸 경우
+          const errorText = await res.text();
+          console.error("서버 응답 오류:", errorText);
+          throw new Error("서버 경로(/api/submit-post-survey)가 없거나 서버가 꺼져 있습니다.");
+        }
+      } catch (e) {
+        alert('저장 실패: ' + e.message);
+        btn.disabled = false;
+        btn.textContent = "설문 제출 및 종료";
+      }
+    }
+  </script>
+</body>
+</html>

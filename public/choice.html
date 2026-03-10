@@ -1,0 +1,174 @@
+
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>행동 선택</title>
+  <style>
+    /* ✅ UI 수정: 화면 중앙이 아니라 상단 15% 지점에 배치 */
+    body { 
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
+      margin: 0; 
+      padding: 0;
+      background-color: #f5f7f9; 
+      display: flex; 
+      justify-content: center; /* 가로 중앙 */
+      align-items: flex-start; /* 세로 상단 */
+      min-height: 100vh; 
+      padding-top: 15vh; /* 위에서 15% 띄움 */
+      box-sizing: border-box;
+    }
+
+    .card { 
+      border: 1px solid #e1e4e8; 
+      border-radius: 16px; 
+      padding: 40px 32px; 
+      width: 90%; 
+      max-width: 580px; 
+      background: #fff; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+      text-align: center; 
+      transition: transform 0.3s ease;
+    }
+    
+    h1 { margin: 0 0 24px; font-size: 1.8rem; color: #111; letter-spacing: -0.5px; }
+    
+    /* 상황 묘사 텍스트 (LLM 출력 공간) */
+    .scenario-text {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 40px;
+      word-break: keep-all;
+      min-height: 60px;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    
+    .loading { color: #888; font-style: italic; }
+
+    /* 버튼 디자인 */
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    
+    button {
+      padding: 30px 20px; border: none; border-radius: 16px; cursor: pointer;
+      font-size: 1.1rem; font-weight: bold; transition: all 0.2s;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    button:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+    button:disabled { opacity: 0.5; cursor: wait; }
+
+    /* STOP 버튼 */
+    .btn-stop { background-color: #fff5f5; color: #e03131; border: 2px solid #ffc9c9; }
+    .btn-stop:hover { background-color: #ffe3e3; border-color: #ffa8a8; }
+    .icon-stop { font-size: 2.5rem; }
+
+    /* GO 버튼 */
+    .btn-go { background-color: #ebfbee; color: #099268; border: 2px solid #c3fae8; }
+    .btn-go:hover { background-color: #d3f9e8; border-color: #96f2d7; }
+    .icon-go { font-size: 2.5rem; }
+
+    #loader { display: none; margin-top: 24px; color: #007bff; font-weight: 600; font-size: 0.95rem;}
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>선택의 순간</h1>
+    
+    <div id="scenario-box" class="scenario-text loading">
+      현재 상황을 분석하고 있습니다...
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-stop" onclick="handleChoice('Stop')">
+        <div class="icon-stop">✋</div>
+        <div>작업 중지</div>
+        <div style="font-size: 0.85rem; font-weight: normal; opacity: 0.8;">위험을 알리고 개선 요구</div>
+      </button>
+
+      <button class="btn-go" onclick="handleChoice('Go')">
+        <div class="icon-go">🏃</div>
+        <div>작업 강행</div>
+        <div style="font-size: 0.85rem; font-weight: normal; opacity: 0.8;">조심하면서 그대로 진행</div>
+      </button>
+    </div>
+
+    <div id="loader">다음 단계로 이동 중입니다...</div>
+  </div>
+
+<script>
+  // 1. 필요한 데이터 확인
+  const chosenCondition = localStorage.getItem("selectedCondition");
+  const rawData = localStorage.getItem("surveyResult") || localStorage.getItem("preSurveyResult");
+  let parsedData = null;
+
+  if (!rawData) {
+    alert("데이터가 없습니다. 처음부터 다시 시작해주세요.");
+    window.location.href = "/";
+  } else {
+    parsedData = JSON.parse(rawData);
+    if (!chosenCondition) {
+      alert("진행 조건 오류. 다시 선택해주세요.");
+      window.location.href = "next.html";
+    }
+  }
+
+  // 2. 페이지 로드 즉시 실행: 서버에 상황 묘사 요청 (LLM)
+  (async function loadContext() {
+    if (!parsedData) return;
+
+    try {
+      // 서버로 설문 데이터를 보내서 "시나리오 요약" 요청
+      const res = await fetch("/api/context", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ payload: parsedData.data }) 
+      });
+      
+      const json = await res.json();
+      
+      const box = document.getElementById("scenario-box");
+      if (json.ok && json.text) {
+        // 성공 시 텍스트 교체
+        box.innerText = json.text;
+        box.classList.remove("loading");
+      } else {
+        // 실패 시 기본 멘트
+        throw new Error("Text generation failed");
+      }
+    } catch (e) {
+      console.warn("LLM 로딩 실패, 기본 텍스트 사용:", e);
+      const box = document.getElementById("scenario-box");
+      box.innerText = "위험 요소를 발견했습니다. 하지만 일정 압박과 주변 분위기 때문에 망설여집니다. 당신이라면 어떻게 하시겠습니까?";
+      box.classList.remove("loading");
+    }
+  })();
+
+  // 3. 버튼 클릭 핸들러
+  function handleChoice(branch) {
+    // UI 업데이트
+    document.getElementById("loader").style.display = "block";
+    document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+
+    // 선택 결과 저장
+    localStorage.setItem("branchChoice", branch);
+    
+    console.log(`Choice: ${branch} -> Next: ${chosenCondition}`);
+
+    // 부드러운 전환을 위해 약간 딜레이
+    setTimeout(() => {
+      if (chosenCondition === "C3") {
+        window.location.href = "c3.html"; // 채팅
+      } else {
+        window.location.href = "c2.html"; // 편지
+      }
+    }, 400);
+  }
+</script>
+
+</body>
+</html>
