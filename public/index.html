@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>안전 넛지 시뮬레이션</title>
+    <title>안전 교육 시뮬레이션</title>
     <style>
       body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px auto; max-width: 820px; color: #333; }
       
@@ -87,6 +87,26 @@
     <form id="surveyForm" onsubmit="return false;">
       
       <div class="step active" data-step="1">
+        <div style="background-color: #f8f9fa; border: 1px solid #e2e6ea; border-radius: 12px; padding: 24px; margin-bottom: 24px; line-height: 1.6; color: #333;">
+          <h2 style="margin-top: 0; margin-bottom: 16px; font-size: 1.2rem;">안녕하십니까?</h2>
+          <p style="margin: 0 0 12px 0;">
+            본 설문은 건설현장 근로자의 안전한 작업환경 조성을 위해 <strong>"맞춤형 안전 메시지"</strong>의 효과를 분석하기 위해 마련되었습니다.
+          </p>
+          <p style="margin: 0 0 12px 0;">
+            여러분의 소중한 응답은 개인 맞춤형 안전 관리 방안을 개발하고, 건설현장의 안전 문화를 향상시키는 데 중요한 기초 자료로 활용될 것입니다.
+          </p>
+          <p style="margin: 0 0 12px 0;">
+            응답해 주신 모든 내용은 <strong>통계법 제33조</strong>에 의해 비밀이 철저히 보장되며, 본 연구 목적 이외의 용도로는 절대 사용되지 않습니다.
+          </p>
+          <p style="margin: 0 0 20px 0;">
+            바쁘시더라도 잠시 시간을 내어 솔직하게 답변해 주시면 감사하겠습니다.
+          </p>
+          
+          <div style="text-align: right; font-size: 0.95rem; color: #555;">
+            <p style="margin: 0;">2024년 10월</p>
+            <p style="margin: 0;"><strong>연구 담당자 :</strong> 서울과학기술대학교 안전공학과 OOO</p>
+          </div>
+        </div>
         <h3>1) 기본 프로필</h3>
         <div class="card">
           <div class="row">
@@ -224,9 +244,11 @@
       </div>
 
       <div class="step" data-step="5">
-        <h3>5) 안전 태도 자가진단</h3>
+        <h3>5) 위험지각 인식확인</h3>
+        <p style="color: #666; font-size: 0.95rem; margin-top: -10px; margin-bottom: 16px;">아래 문항은 건설현장 사고에 대한 본인의 인식을 묻는 문항입니다.</p>
+        
         <div class="card">
-          <label>나는 작업 전 위험요소를 꼼꼼히 확인한다.</label>
+          <label>R1. 건설현장에서 사고가 발생하면, 피해는 대체로 매우 심각하다고 생각한다.</label>
           <div class="chips" data-max="1" data-group="q13">
             <label class="chip"><input type="checkbox" value="1">1</label>
             <label class="chip"><input type="checkbox" value="2">2</label>
@@ -237,7 +259,7 @@
         </div>
 
         <div class="card">
-          <label>나는 불편해도 보호구 착용의 원칙을 지킨다.</label>
+          <label>R2. 나는 건설현장에서 사고를 겪을 가능성이 있다고 생각한다.</label>
           <div class="chips" data-max="1" data-group="q14">
             <label class="chip"><input type="checkbox" value="1">1</label>
             <label class="chip"><input type="checkbox" value="2">2</label>
@@ -248,7 +270,7 @@
         </div>
 
         <div class="card">
-          <label>나는 동료의 위험 행동을 지적해준다.</label>
+          <label>R3. 건설현장에서의 업무는 위험이 크다고 느낀다.</label>
           <div class="chips" data-max="1" data-group="q15">
             <label class="chip"><input type="checkbox" value="1">1</label>
             <label class="chip"><input type="checkbox" value="2">2</label>
