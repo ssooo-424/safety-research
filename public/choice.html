@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ko">
 <head>
@@ -29,146 +28,187 @@
       background: #fff; 
       box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
       text-align: center; 
-      transition: transform 0.3s ease;
+    }
+
+    h1 { 
+      font-size: 1.5rem; 
+      margin-top: 0; 
+      margin-bottom: 24px; 
+      color: #1a1a1a; 
+    }
+
+    /* 시나리오 박스 (말풍선 느낌) */
+    .scenario-box { 
+      background: #eef2f5; 
+      border-radius: 12px; 
+      padding: 24px; 
+      font-size: 1.1rem; 
+      line-height: 1.6; 
+      color: #333; 
+      margin-bottom: 32px; 
+      text-align: left;
+      border-left: 5px solid #007bff;
     }
     
-    h1 { margin: 0 0 24px; font-size: 1.8rem; color: #111; letter-spacing: -0.5px; }
-    
-    /* 상황 묘사 텍스트 (LLM 출력 공간) */
-    .scenario-text {
-      font-size: 1.15rem;
-      line-height: 1.6;
-      color: #333;
-      margin-bottom: 40px;
-      word-break: keep-all;
-      min-height: 60px;
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 12px;
+    .loading { 
+      color: #888; 
+      font-style: italic; 
+    }
+
+    /* 버튼 영역 */
+    .actions { 
+      display: flex; 
+      gap: 16px; 
+      justify-content: center; 
+    }
+    .btn { 
+      flex: 1; 
+      padding: 16px; 
+      border-radius: 12px; 
+      border: none; 
+      font-size: 1.1rem; 
+      font-weight: bold; 
+      cursor: pointer; 
+      transition: transform 0.1s, box-shadow 0.2s; 
+    }
+    .btn:active { 
+      transform: scale(0.98); 
     }
     
-    .loading { color: #888; font-style: italic; }
-
-    /* 버튼 디자인 */
-    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    
-    button {
-      padding: 30px 20px; border: none; border-radius: 16px; cursor: pointer;
-      font-size: 1.1rem; font-weight: bold; transition: all 0.2s;
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    .btn-stop { 
+      background: #fff; 
+      color: #d32f2f; 
+      border: 2px solid #d32f2f; 
     }
-    button:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-    button:disabled { opacity: 0.5; cursor: wait; }
+    .btn-stop:hover { 
+      background: #ffebee; 
+      box-shadow: 0 4px 12px rgba(211,47,47,0.2); 
+    }
 
-    /* STOP 버튼 */
-    .btn-stop { background-color: #fff5f5; color: #e03131; border: 2px solid #ffc9c9; }
-    .btn-stop:hover { background-color: #ffe3e3; border-color: #ffa8a8; }
-    .icon-stop { font-size: 2.5rem; }
+    .btn-go { 
+      background: #111; 
+      color: #fff; 
+    }
+    .btn-go:hover { 
+      background: #333; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+    }
 
-    /* GO 버튼 */
-    .btn-go { background-color: #ebfbee; color: #099268; border: 2px solid #c3fae8; }
-    .btn-go:hover { background-color: #d3f9e8; border-color: #96f2d7; }
-    .icon-go { font-size: 2.5rem; }
-
-    #loader { display: none; margin-top: 24px; color: #007bff; font-weight: 600; font-size: 0.95rem;}
+    /* 로딩 인디케이터 */
+    .loader {
+      display: none;
+      margin-top: 20px;
+      font-size: 0.95rem;
+      color: #666;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-radius: 50%;
+      border-top-color: #007bff;
+      animation: spin 1s ease-in-out infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h1>선택의 순간</h1>
+    <h1>🚨 상황 발생</h1>
     
-    <div id="scenario-box" class="scenario-text loading">
-      현재 상황을 분석하고 있습니다...
+    <div class="scenario-box loading" id="scenario-box">
+      설문 데이터를 바탕으로 상황을 분석 중입니다...
     </div>
 
-    <div class="btn-row">
-      <button class="btn-stop" onclick="handleChoice('Stop')">
-        <div class="icon-stop">✋</div>
-        <div>작업 중지</div>
-        <div style="font-size: 0.85rem; font-weight: normal; opacity: 0.8;">위험을 알리고 개선 요구</div>
+    <div class="actions">
+      <button class="btn btn-stop" onclick="handleChoice('Stop')">
+        🛑 멈춘다
+        <div style="font-size:0.85rem; font-weight:normal; margin-top:4px;">(작업 중지 및 점검)</div>
       </button>
-
-      <button class="btn-go" onclick="handleChoice('Go')">
-        <div class="icon-go">🏃</div>
-        <div>작업 강행</div>
-        <div style="font-size: 0.85rem; font-weight: normal; opacity: 0.8;">조심하면서 그대로 진행</div>
+      <button class="btn btn-go" onclick="handleChoice('Go')">
+        ⚠️ 강행한다
+        <div style="font-size:0.85rem; font-weight:normal; margin-top:4px;">(일정대로 계속 진행)</div>
       </button>
     </div>
 
-    <div id="loader">다음 단계로 이동 중입니다...</div>
+    <div class="loader" id="loader">
+      <div class="spinner"></div> 결과를 준비하고 있습니다...
+    </div>
   </div>
 
-<script>
-  // 1. 필요한 데이터 확인
-  const chosenCondition = localStorage.getItem("selectedCondition");
-  const rawData = localStorage.getItem("surveyResult") || localStorage.getItem("preSurveyResult");
-  let parsedData = null;
+  <script>
+    // 1. 저장된 설문 데이터 불러오기
+    const rawData = localStorage.getItem("preSurveyResult");
+    let parsedData = null;
 
-  if (!rawData) {
-    alert("데이터가 없습니다. 처음부터 다시 시작해주세요.");
-    window.location.href = "/";
-  } else {
-    parsedData = JSON.parse(rawData);
-    if (!chosenCondition) {
-      alert("진행 조건 오류. 다시 선택해주세요.");
-      window.location.href = "next.html";
+    if (!rawData) {
+      alert("설문 데이터가 없습니다. 처음으로 돌아갑니다.");
+      window.location.href = "/";
+    } else {
+      try {
+        parsedData = JSON.parse(rawData);
+      } catch (e) {
+        console.error(e);
+      }
     }
-  }
 
-  // 2. 페이지 로드 즉시 실행: 서버에 상황 묘사 요청 (LLM)
-  (async function loadContext() {
-    if (!parsedData) return;
-
-    try {
-      // 서버로 설문 데이터를 보내서 "시나리오 요약" 요청
-      const res = await fetch("/api/context", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ payload: parsedData.data }) 
-      });
+    // 2. 페이지 로드 시, LLM에 맥락(Context) 생성 요청
+    (async function init() {
+      if (!parsedData) return;
       
-      const json = await res.json();
-      
-      const box = document.getElementById("scenario-box");
-      if (json.ok && json.text) {
-        // 성공 시 텍스트 교체
-        box.innerText = json.text;
+      try {
+        // 서버로 설문 데이터를 보내서 "시나리오 요약" 요청
+        const res = await fetch("/api/context", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ payload: parsedData.data }) 
+        });
+        
+        const json = await res.json();
+        
+        const box = document.getElementById("scenario-box");
+        if (json.ok && json.text) {
+          // 성공 시 텍스트 교체
+          box.innerText = json.text;
+          box.classList.remove("loading");
+        } else {
+          // 실패 시 기본 멘트
+          throw new Error("Text generation failed");
+        }
+      } catch (e) {
+        console.warn("LLM 로딩 실패, 기본 텍스트 사용:", e);
+        const box = document.getElementById("scenario-box");
+        box.innerText = "위험 요소를 발견했습니다. 하지만 일정 압박과 주변 분위기 때문에 망설여집니다. 당신이라면 어떻게 하시겠습니까?";
         box.classList.remove("loading");
-      } else {
-        // 실패 시 기본 멘트
-        throw new Error("Text generation failed");
       }
-    } catch (e) {
-      console.warn("LLM 로딩 실패, 기본 텍스트 사용:", e);
-      const box = document.getElementById("scenario-box");
-      box.innerText = "위험 요소를 발견했습니다. 하지만 일정 압박과 주변 분위기 때문에 망설여집니다. 당신이라면 어떻게 하시겠습니까?";
-      box.classList.remove("loading");
+    })();
+
+    // 3. 버튼 클릭 핸들러 (이 부분만 교체됨!)
+    function handleChoice(branch) {
+      // UI 업데이트 (로딩 표시)
+      document.getElementById("loader").style.display = "block";
+      document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+
+      // 사용자의 선택(Stop 또는 Go) 저장
+      localStorage.setItem("branchChoice", branch);
+      
+      // next.js에서 저장해둔 조건(C1, C2, C3) 꺼내기
+      const cond = localStorage.getItem("chosenCondition") || localStorage.getItem("selectedCondition");
+      
+      // ✅ 선택 후 각각의 결과 페이지로 이동
+      setTimeout(() => {
+        if (cond === "C1") window.location.href = "/c1.html";
+        else if (cond === "C2") window.location.href = "/c2.html";
+        else if (cond === "C3") window.location.href = "/c3.html";
+        else window.location.href = "/c1.html"; // 기본값
+      }, 500);
     }
-  })();
-
-  // 3. 버튼 클릭 핸들러
-  function handleChoice(branch) {
-    // UI 업데이트
-    document.getElementById("loader").style.display = "block";
-    document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-
-    // 선택 결과 저장
-    localStorage.setItem("branchChoice", branch);
-    
-    console.log(`Choice: ${branch} -> Next: ${chosenCondition}`);
-
-    // 부드러운 전환을 위해 약간 딜레이
-    setTimeout(() => {
-      if (chosenCondition === "C3") {
-        window.location.href = "c3.html"; // 채팅
-      } else {
-        window.location.href = "c2.html"; // 편지
-      }
-    }, 400);
-  }
-</script>
-
+  </script>
 </body>
 </html>
