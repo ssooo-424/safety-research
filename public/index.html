@@ -37,6 +37,11 @@
       .chip:has(input:checked) { background: #e6f0ff; border-color: #007bff; color: #007bff; font-weight: bold; }
       .chip input { display: none; }
 
+      /* 슬라이더 커스텀 스타일 */
+      .slider { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 5px; background: #eee; outline: none; margin: 15px 0; }
+      .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #007bff; cursor: pointer; border: 4px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+      .slider::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #007bff; cursor: pointer; border: 4px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
       /* 인원 추가 버튼 및 리스트 */
       .btn-add { width: 100%; padding: 12px; border: 2px dashed #ddd; background: #fafafa; color: #666; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 8px; transition: all 0.2s; }
       .btn-add:hover { border-color: #bbb; background: #f0f0f0; color: #333; }
@@ -61,14 +66,11 @@
       .bfi-scale { display: flex; justify-content: space-between; align-items: center; max-width: 400px; margin: 0 auto; }
       .bfi-opt-label { display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; width: 48px; }
       .bfi-opt-label input { position: absolute; opacity: 0; cursor: pointer; }
-      /* 원형 버튼 디자인 */
       .bfi-circle { width: 40px; height: 40px; border-radius: 50%; background: #f1f3f5; color: #868e96; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; transition: all 0.2s ease; border: 2px solid transparent; }
       .bfi-desc { font-size: 11px; color: #adb5bd; margin-top: 6px; font-weight: 500; }
-      /* 선택 효과 */
       .bfi-opt-label input:checked + .bfi-circle { background: #007bff; color: #fff; box-shadow: 0 4px 6px rgba(0,123,255,0.3); transform: scale(1.1); }
       .bfi-opt-label:hover .bfi-circle { background: #e9ecef; }
       .bfi-opt-label input:checked + .bfi-circle:hover { background: #0069d9; }
-      /* 범례 */
       .bfi-guide { display: flex; justify-content: space-between; font-size: 0.8rem; color: #888; background: #f8f9fa; padding: 10px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eee; }
       .bfi-header { display: flex; justify-content: space-between; max-width: 400px; margin: 0 auto 10px; font-size: 0.8rem; color: #666; text-align: center; }
       .bfi-header span { width: 48px; }
@@ -98,9 +100,8 @@
           <p style="margin: 0 0 12px 0;">
             응답해 주신 모든 내용은 <strong>통계법 제33조</strong>에 의해 비밀이 철저히 보장되며, 본 연구 목적 이외의 용도로는 절대 사용되지 않습니다.
           </p>
-          
           <div style="text-align: right; font-size: 0.95rem; color: #555;">
-            <p style="margin: 0;"></strong> 서울대학교건설기술연구실</p>
+            <p style="margin: 0;">서울대학교 건설기술연구실</p>
           </div>
         </div>
         <h3>1) 기본 프로필</h3>
@@ -166,12 +167,43 @@
               <input type="text" class="person-detail" id="importantPersonDetail" placeholder="예: 지민이(7살), 아내" />
             </div>
           </div>
-          <button type="button" class="btn-add" id="addPersonBtn" style="display:none;">+ 인원 추가하기</button>
         </div>
       </div>
 
       <div class="step" data-step="2">
-        <h3>2) 성향 파악 (BFI-10)</h3>
+        <h3>2) 위험지각 인식확인</h3>
+        <p style="color: #666; font-size: 0.95rem; margin-top: -10px; margin-bottom: 24px;">아래 슬라이더를 밀어서 본인의 인식을 표시해 주세요. (0% ~ 100%)</p>
+        
+        <div class="card">
+          <label>R1. 건설현장에서의 사고 피해는 <span id="val_q13" style="color:#007bff; font-weight:bold;">50</span>% 정도 심각하다고 생각한다.</label>
+          <input type="range" class="slider" id="q13" min="0" max="100" step="10" value="50" oninput="document.getElementById('val_q13').innerText = this.value">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #999; margin-top: 5px;">
+            <span>0% (전혀 안 심각)</span>
+            <span>100% (매우 심각)</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <label>R2. 나는 건설현장에서 내가 사고를 겪을 가능성은 <span id="val_q14" style="color:#007bff; font-weight:bold;">50</span>% 라고 생각한다.</label>
+          <input type="range" class="slider" id="q14" min="0" max="100" step="10" value="50" oninput="document.getElementById('val_q14').innerText = this.value">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #999; margin-top: 5px;">
+            <span>0% (희박함)</span>
+            <span>100% (확실함)</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <label>R3. 건설현장에서의 업무 위험 수준은 <span id="val_q15" style="color:#007bff; font-weight:bold;">50</span>% 라고 생각한다.</label>
+          <input type="range" class="slider" id="q15" min="0" max="100" step="10" value="50" oninput="document.getElementById('val_q15').innerText = this.value">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #999; margin-top: 5px;">
+            <span>0% (안전함)</span>
+            <span>100% (매우 위험)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" data-step="3">
+        <h3>3) 성향 파악 (BFI-10)</h3>
         <div class="card">
           <div class="muted" style="text-align: center; margin-bottom: 20px;">
             "평소의 나는..." (솔직하게 체크해 주세요)
@@ -183,8 +215,8 @@
         </div>
       </div>
 
-      <div class="step" data-step="3">
-        <h3>3) 최근 겪거나 목격한 위험 상황</h3>
+      <div class="step" data-step="4">
+        <h3>4) 최근 겪거나 목격한 위험 상황</h3>
         <div class="card">
           <label>어떤 작업 중이었나요?</label>
           <div class="chips" data-max="1" data-group="process">
@@ -223,8 +255,8 @@
         </div>
       </div>
 
-      <div class="step" data-step="4">
-        <h3>4) 상황 구체화</h3>
+      <div class="step" data-step="5">
+        <h3>5) 상황 구체화</h3>
         <div class="card">
           <label>Q. 구체적인 상황을 묘사해주세요.</label>
           <textarea id="sentence" placeholder="예: 2층 슬라브 끝단에서 작업하는데 안전난간이 잠시 해체되어 있었고, 빨리 하려다 발을 헛디뎠음."></textarea>
@@ -236,44 +268,6 @@
         <div class="card">
           <label>Q. 그때 어떤 생각이 들었나요?</label>
           <textarea id="feeling" placeholder="예: 설마 내가 떨어지겠어? 잠깐인데 괜찮겠지."></textarea>
-        </div>
-      </div>
-
-      <div class="step" data-step="5">
-        <h3>5) 위험지각 인식확인</h3>
-        <p style="color: #666; font-size: 0.95rem; margin-top: -10px; margin-bottom: 16px;">아래 문항은 건설현장 사고에 대한 본인의 인식을 묻는 문항입니다.</p>
-        
-        <div class="card">
-          <label>R1. 건설현장에서 사고가 발생하면, 피해는 대체로 매우 심각하다고 생각한다.</label>
-          <div class="chips" data-max="1" data-group="q13">
-            <label class="chip"><input type="checkbox" value="1">1</label>
-            <label class="chip"><input type="checkbox" value="2">2</label>
-            <label class="chip"><input type="checkbox" value="3">3</label>
-            <label class="chip"><input type="checkbox" value="4">4</label>
-            <label class="chip"><input type="checkbox" value="5">5</label>
-          </div>
-        </div>
-
-        <div class="card">
-          <label>R2. 나는 건설현장에서 사고를 겪을 가능성이 있다고 생각한다.</label>
-          <div class="chips" data-max="1" data-group="q14">
-            <label class="chip"><input type="checkbox" value="1">1</label>
-            <label class="chip"><input type="checkbox" value="2">2</label>
-            <label class="chip"><input type="checkbox" value="3">3</label>
-            <label class="chip"><input type="checkbox" value="4">4</label>
-            <label class="chip"><input type="checkbox" value="5">5</label>
-          </div>
-        </div>
-
-        <div class="card">
-          <label>R3. 건설현장에서의 업무는 위험이 크다고 느낀다.</label>
-          <div class="chips" data-max="1" data-group="q15">
-            <label class="chip"><input type="checkbox" value="1">1</label>
-            <label class="chip"><input type="checkbox" value="2">2</label>
-            <label class="chip"><input type="checkbox" value="3">3</label>
-            <label class="chip"><input type="checkbox" value="4">4</label>
-            <label class="chip"><input type="checkbox" value="5">5</label>
-          </div>
         </div>
       </div>
 
@@ -304,7 +298,6 @@
     </form>
     
     <script>
-      // 1. 공식 BFI-10 문항 데이터 (수정 금지)
       const bfiQuestions = [
         "1. 나는 내향적/조용한 사람이라고 생각한다",
         "2. 나는 대체로 사람을 잘 믿는 편이다",
@@ -318,7 +311,6 @@
         "10. 나는 상상력이 풍부한 편이다"
       ];
 
-      // BFI 문항 렌더링
       const bfiContainer = document.getElementById('bfiContainer');
       bfiQuestions.forEach((q, idx) => {
         const index = idx + 1;
@@ -338,14 +330,12 @@
         bfiContainer.insertAdjacentHTML('beforeend', html);
       });
 
-      // 2. 단계 이동 및 UI 로직
       let currentStep = 1;
       const totalSteps = 6;
       const prevBtn = document.getElementById('prevBtn');
       const nextBtn = document.getElementById('nextBtn');
       const progressPill = document.getElementById('progressPill');
       
-      // Chips 선택 로직 (data-max 처리)
       document.body.addEventListener('change', (e) => {
         if (e.target.matches('.chips input')) {
           const container = e.target.closest('.chips');
@@ -353,10 +343,7 @@
           const checked = container.querySelectorAll('input:checked');
           
           if (checked.length > max) {
-            // max 초과 시 현재 클릭한 것을 제외하고 가장 먼저 체크된 것을 해제
             e.target.checked = false; 
-            // UX상으로는 보통 가장 오래된걸 해제하거나 클릭을 막지만, 
-            // 여기선 단순화를 위해 방금 누른걸 취소시킴 (또는 alert)
             alert(`최대 ${max}개까지 선택 가능합니다.`);
           }
         }
@@ -372,7 +359,6 @@
 
       nextBtn.addEventListener('click', () => {
         if (currentStep < totalSteps) {
-          // 1단계 이름 필수 체크
           if (currentStep === 1 && !document.getElementById('name').value.trim()) {
             alert('이름을 입력해주세요.');
             return;
@@ -391,7 +377,6 @@
         }
       });
 
-      // 3. 데이터 수집 (서버 전송용)
       function getCheckedValues(groupName) {
         const inputs = document.querySelectorAll(`.chips[data-group="${groupName}"] input:checked`);
         return Array.from(inputs).map(el => el.value);
@@ -407,7 +392,6 @@
       }
 
       function collectFormData() {
-        // Step 1
         const profile = {
           name: document.getElementById('name').value,
           org: document.getElementById('org').value,
@@ -415,10 +399,9 @@
           career: document.getElementById('career').value,
           jobType: getCheckedValues('jobType'),
           importantPerson: document.getElementById('importantPersonType').value + " " + document.getElementById('importantPersonDetail').value,
-          importantPersonDetail: document.getElementById('importantPersonDetail').value // 상세 정보
+          importantPersonDetail: document.getElementById('importantPersonDetail').value
         };
 
-        // Step 3 (Risk Type이 HTML상 checkbox지만 로직상 하나만 가져오도록 처리)
         const riskArr = getCheckedValues('riskType');
         const riskType = riskArr.length > 0 ? riskArr[0] : "";
 
@@ -431,14 +414,13 @@
           feeling: document.getElementById('feeling').value
         };
 
-        // Step 5 Attitude (HTML상 checkbox) -> 값 추출
+        // 수정된 데이터 수집 로직 (Slider 값 가져오기)
         const attitude = {
-          q13: getCheckedValues('q13')[0] || null,
-          q14: getCheckedValues('q14')[0] || null,
-          q15: getCheckedValues('q15')[0] || null
+          q13: document.getElementById('q13').value,
+          q14: document.getElementById('q14').value,
+          q15: document.getElementById('q15').value
         };
 
-        // Step 6 & BFI
         const psychology = {
           riskBarriers: getCheckedValues('lowReason'),
           extraComment: document.getElementById('extraComment').value,
@@ -449,7 +431,6 @@
         return { profile, incident, psychology };
       }
 
-      // 4. 저장 및 불러오기 기능
       async function saveAndGo() {
         const payload = collectFormData();
         if(!payload.profile.name) return alert("이름은 필수입니다.");
@@ -468,7 +449,6 @@
           if (data.ok) {
             localStorage.setItem("surveyResult", JSON.stringify(data));
             localStorage.setItem("preSurveyResult", JSON.stringify(data));
-            console.log("Saved:", data.savedAs);
             window.location.href = "next.html";
           } else {
             alert("저장 실패: " + data.error);
@@ -487,10 +467,9 @@
           if (!res.ok) throw new Error("데이터 없음");
           
           const json = await res.json();
-          const d = json.record.data; // payload 구조
+          const d = json.record.data;
           if (!d) return;
 
-          // 텍스트 필드 복구
           const setVal = (id, val) => { 
             const el = document.getElementById(id);
             if(el) el.value = val || ""; 
@@ -506,7 +485,6 @@
           setVal('feeling', d.incident?.feeling);
           setVal('extraComment', d.psychology?.extraComment);
 
-          // 체크박스(Chips) 복구
           const setChecks = (groupName, values) => {
             if (!values) return;
             const arr = Array.isArray(values) ? values : [values];
@@ -521,11 +499,20 @@
           setChecks('triggers', d.incident?.triggers);
           setChecks('lowReason', d.psychology?.riskBarriers);
           
-          setChecks('q13', d.psychology?.attitude?.q13);
-          setChecks('q14', d.psychology?.attitude?.q14);
-          setChecks('q15', d.psychology?.attitude?.q15);
+          // 슬라이더 값 및 텍스트 표시 복구
+          if (d.psychology?.attitude) {
+             const q13Val = d.psychology.attitude.q13 || 50;
+             const q14Val = d.psychology.attitude.q14 || 50;
+             const q15Val = d.psychology.attitude.q15 || 50;
+             
+             document.getElementById('q13').value = q13Val;
+             document.getElementById('val_q13').innerText = q13Val;
+             document.getElementById('q14').value = q14Val;
+             document.getElementById('val_q14').innerText = q14Val;
+             document.getElementById('q15').value = q15Val;
+             document.getElementById('val_q15').innerText = q15Val;
+          }
 
-          // BFI 라디오 복구
           if (d.psychology?.bfi) {
             for(let i=1; i<=10; i++) {
               const val = d.psychology.bfi[`q${i}`];
@@ -535,9 +522,7 @@
               }
             }
           }
-
           alert("최근 설문 데이터를 불러왔습니다.");
-
         } catch (e) {
           console.error(e);
           alert("저장된 데이터가 없습니다.");
@@ -546,4 +531,3 @@
     </script>
   </body>
 </html>
-
