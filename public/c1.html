@@ -20,102 +20,127 @@
       font-size: 1.1rem; border-bottom: 1px solid #ddd; flex-shrink: 0; z-index: 10;
     }
     #content-box {
-      flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column;
+      flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px;
     }
-    .report-card {
-      background: #fff; padding: 24px; border-radius: 18px; border: 1px solid #e0e0e0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 1.05rem; line-height: 1.7;
-      word-wrap: break-word; animation: fadeIn 0.4s ease-out; margin-bottom: 20px;
+
+    /* 로딩 애니메이션 */
+    .loader-container {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; color: #666; font-size: 1.1rem; gap: 15px;
     }
-    .report-image {
-      width: 100%; border-radius: 12px; margin-top: 24px;
-      border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    .spinner {
+      width: 40px; height: 40px; border: 4px solid rgba(0,0,0,0.1);
+      border-radius: 50%; border-top-color: #007bff;
+      animation: spin 1s ease-in-out infinite;
     }
-    /* 새로 추가된 안전수칙 박스 스타일 */
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 리포트 스타일 */
+    .report-section {
+      background: #fff; border-radius: 12px; padding: 24px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #d32f2f;
+    }
+    .report-section h3 { margin-top: 0; color: #d32f2f; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;}
+    
     .rules-box {
-      margin-top: 24px; padding-top: 20px; border-top: 2px dashed #ddd;
-      color: #333;
+      background: #eef2f5; border-radius: 12px; padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #007bff; margin-top: 20px;
     }
-    .rules-box h3 {
-      margin-top: 0; color: #d32f2f; font-size: 1.1rem; margin-bottom: 12px;
+    .rules-box h3 { margin-top: 0; color: #0056b3; margin-bottom: 15px;}
+
+    .report-image {
+      width: 100%; max-width: 500px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; margin-left: auto; margin-right: auto;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
+
+    /* 하단 다음 단계 버튼 */
+    .next-btn-container { padding: 16px 24px; background: #fff; border-top: 1px solid #ddd; text-align: right; }
+    .next-btn {
+      background: #333; color: #fff; border: none; padding: 14px 24px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s;
     }
-    .action-container {
-      background: #fff; padding: 16px 20px; display: flex;
-      justify-content: center; border-top: 1px solid #ddd;
-    }
-    #next-btn {
-      background: #333; color: #fff; border: none; padding: 14px 32px;
-      border-radius: 24px; font-size: 1.1rem; font-weight: bold;
-      cursor: pointer; display: none; transition: background 0.2s;
-    }
-    #next-btn:hover { background: #555; }
-    #loader-container {
-      display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #555; font-weight: bold;
-    }
-    .typing-indicator {
-      background: #fff; border: 1px solid #e0e0e0; padding: 12px 20px;
-      border-radius: 20px; margin-bottom: 16px; display: inline-block; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    .typing-indicator span {
-      display: inline-block; width: 8px; height: 8px; background: #666; border-radius: 50%; margin: 0 3px; animation: typing 1.4s infinite;
-    }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typing { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    .next-btn:hover { background: #555; }
   </style>
 </head>
 <body>
+
   <div class="mobile-frame">
-    <header>사고 사례 분석 리포트</header>
+    <header>사고 사례 분석 리포트 (C1)</header>
     
     <div id="content-box">
-      <div id="loader-container">
-        <div class="typing-indicator"><span></span><span></span><span></span></div>
-        <div>과거의 유사 사고 데이터를 분석 중입니다...</div>
+      <div id="c1-warning-box" style="display: none; padding: 18px 20px; border-radius: 12px; margin-bottom: 20px; font-weight: bold; font-size: 1.05rem; line-height: 1.6; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);"></div>
+
+      <div id="loader-container" class="loader-container">
+        <div class="spinner"></div>
+        <div>유사한 사고 사례 데이터를 수집 및 분석 중입니다...</div>
       </div>
 
       <div id="report-container" style="display: none;">
-        <div class="report-card">
-          <div id="report-text"></div>
+        <div class="report-section">
+          <h3>📝 사고 개요 및 분석</h3>
+          <div id="report-text" style="line-height: 1.6; color: #333;"></div>
           <div id="image-wrapper"></div>
-          <div id="rules-container"></div>
         </div>
+        
+        <div id="rules-container"></div>
       </div>
     </div>
 
-    <div class="action-container">
-      <button id="next-btn" onclick="window.location.href='post-survey.html'">사후 설문 진행하기</button>
+    <div class="next-btn-container" id="next-btn" style="display: none;">
+      <button class="next-btn" onclick="window.location.href='/post-survey.html'">사후 설문 작성하기 ➔</button>
     </div>
   </div>
 
   <script>
-    async function init() {
-      try {
-        let survey = null;
-        const raw = localStorage.getItem("preSurveyResult");
-        if (raw) survey = JSON.parse(raw);
-        else {
-          const res = await fetch("/api/last-survey");
-          const json = await res.json();
-          if(json.ok) survey = { data: json.record.data, scenarioId: json.record.scenarioId, savedAs: json.savedAs };
-        }
-        if (!survey) throw new Error("설문 데이터를 찾을 수 없습니다.");
+    document.addEventListener("DOMContentLoaded", async () => {
+      // 1. 로컬스토리지에서 최근 설문 데이터(preSurveyResult) 불러오기
+      const raw = localStorage.getItem("preSurveyResult");
+      if (!raw) {
+        alert("저장된 설문 데이터가 없습니다. 처음으로 돌아갑니다.");
+        window.location.href = "/";
+        return;
+      }
 
+      const survey = JSON.parse(raw);
+
+      // 2. 서버에 C1 생성 요청 보내기
+      try {
         const res = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ condition: "C1", payload: survey.data, scenarioId: survey.scenarioId, savedAs: survey.savedAs })
+          body: JSON.stringify({
+            condition: "C1",
+            payload: survey.data,
+            scenarioId: survey.scenarioId
+          })
         });
-        const data = await res.json();
-        if (!data.ok) throw new Error(data.error || "서버 통신 오류");
 
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+
+        // 로딩 숨기고 결과 영역 표시
         document.getElementById("loader-container").style.display = "none";
         document.getElementById("report-container").style.display = "block";
         document.getElementById("next-btn").style.display = "block";
+
+        // ✅ 초이스 페이지에서 뭘 선택했는지 확인하여 경고 문구 띄우기
+        const branch = localStorage.getItem("branchChoice") || "Go";
+        const warningBox = document.getElementById("c1-warning-box");
+        if (warningBox) {
+          if (branch === "Go" || branch === "Proceed") {
+            // 강행을 선택했을 때 (교수님 요청 문구)
+            warningBox.innerHTML = "⚠️ 당신이 해당 위험상황을 인지했음에도 불구하고<br><span style='color: #d32f2f;'>작업을 강행했을 때 발생할 수 있는 사고 사례</span>에 대한 정보입니다.";
+            warningBox.style.backgroundColor = "#fff3cd"; // 노란색 경고 배경
+            warningBox.style.color = "#856404";
+            warningBox.style.border = "1px solid #ffeeba";
+            warningBox.style.display = "block";
+          } else {
+            // 멈춤을 선택했을 때 (안도감을 주는 문구 추가)
+            warningBox.innerHTML = "✅ 당신은 작업을 멈추어 안전을 지켜냈습니다.<br>하지만 만약 <span style='color: #d32f2f;'>무시하고 강행했다면</span> 아래와 같은 사고가 발생할 수 있었습니다.";
+            warningBox.style.backgroundColor = "#d4edda"; // 초록색 안도 배경
+            warningBox.style.color = "#155724";
+            warningBox.style.border = "1px solid #c3e6cb";
+            warningBox.style.display = "block";
+          }
+        }
 
         // ✅ 1. ===안전수칙=== 을 기준으로 텍스트 쪼개기
         const parts = data.text.split("===안전수칙===");
@@ -144,10 +169,10 @@
         }
 
       } catch (e) {
-        document.getElementById("loader-container").innerHTML = `<div style="color:red; text-align:center;">오류 발생: ${e.message}</div>`;
+        console.error(e);
+        document.getElementById("loader-container").innerHTML = "<span style='color:red;'>⚠️ 리포트 생성 중 오류가 발생했습니다.</span>";
       }
-    }
-    init();
+    });
   </script>
 </body>
 </html>
