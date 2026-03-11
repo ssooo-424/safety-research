@@ -46,16 +46,15 @@ function renderFromLocalStorage() {
 // ✅ 페이지 로드 시 렌더
 let parsed = renderFromLocalStorage();
 
-// ✅ 이동 버튼: 조건 선택 후 C1/C2/C3로 이동
+// ✅ 이동 버튼: 조건 선택 후 무조건 choice.html로 이동하도록 수정됨
 goBtn.addEventListener("click", () => {
   const cond = getSelectedCondition();
   if (!cond) return alert("C1/C2/C3 중 하나를 선택해주세요.");
 
   localStorage.setItem("chosenCondition", cond);
 
-  if (cond === "C1") window.location.href = "/c1";
-  if (cond === "C2") window.location.href = "/c2";
-  if (cond === "C3") window.location.href = "/c3";
+  // ★ 변경된 부분: 조건에 상관없이 무조건 '위험 시나리오(choice.html)' 페이지로 이동!
+  window.location.href = "/choice.html";
 });
 
 // ✅ 뒤로가기
