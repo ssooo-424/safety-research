@@ -170,8 +170,37 @@
       typingEl.style.display = "none";
     }
 
+    // ✅ 대화 종료 및 사후 설문 버튼 생성 공통 함수
+    function finishSimulation() {
+      chatInputContainer.style.display = "none";
+      quickRepliesBox.style.display = "none";
+
+      setTimeout(() => {
+        appendBubble("수고하셨습니다. 모든 시뮬레이션 대화가 안전하게 종료되었습니다.", "bot");
+        
+        setTimeout(() => {
+          quickRepliesBox.innerHTML = ""; 
+          quickRepliesBox.style.display = "flex";
+          
+          const nextBtn = document.createElement("button");
+          nextBtn.className = "quick-reply-btn";
+          nextBtn.style.backgroundColor = "#333";
+          nextBtn.style.color = "#fff";
+          nextBtn.style.textAlign = "center";
+          nextBtn.style.fontWeight = "bold";
+          nextBtn.textContent = "사후 설문 작성하기 ➔";
+          nextBtn.onclick = () => {
+            window.location.href = "/post-survey.html";
+          };
+          
+          quickRepliesBox.appendChild(nextBtn);
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }, 800);
+      }, 800);
+    }
+
     async function requestBotReply() {
-      showLoading(); // 처음 서버 요청할 때 로딩 표시
+      showLoading(); 
       
       try {
         const res = await fetch("/api/chat", {
@@ -180,7 +209,7 @@
           body: JSON.stringify({ payload, scenarioId, branch, messages })
         });
         const data = await res.json();
-        hideLoading(); // 서버 응답이 오면 일단 로딩 숨김
+        hideLoading(); 
 
         if (!data.ok) throw new Error(data.error || "서버 통신 오류");
 
@@ -200,20 +229,15 @@
         const botText = parsedReply.botMessage;
         const quickReplies = parsedReply.quickReplies || [];
 
-        // 말풍선 분리 및 글자 수 비례 타이핑 효과 적용
         const parts = botText.split("|||");
         for (const part of parts) {
           const text = part.trim();
           if (text) {
-            showLoading(); // 실제 말풍선이 나오기 전에 타이핑 인디케이터 켜기
-            
-            // 💡 글자 수 1개당 40ms 딜레이 부여 (최소 0.6초, 최대 2.5초 제한)
+            showLoading(); 
             const typingDelay = Math.min(2500, Math.max(600, text.length * 40));
-            
             await new Promise(r => setTimeout(r, typingDelay));
-            
-            hideLoading(); // 딜레이 후 인디케이터 끄고
-            appendBubble(text, "bot"); // 실제 텍스트 말풍선 붙이기
+            hideLoading(); 
+            appendBubble(text, "bot"); 
           }
         }
 
@@ -253,6 +277,16 @@
     function handleUserSelection(text) {
       appendBubble(text, "user");
       messages.push({ role: "user", text: text });
+
+      // ✅ 누른 버튼이 마지막 정답 문구라면 여기서 통신을 끊고 사후 설문으로 이동!
+      const cleanUserText = text.replace(/\s+/g, "");
+      const cleanTargetText = TARGET_PHRASE.replace(/\s+/g, "");
+      
+      if (cleanUserText === cleanTargetText) {
+        finishSimulation();
+        return; 
+      }
+
       requestBotReply();
     }
 
@@ -265,17 +299,7 @@
 
       if (cleanUserText === cleanTargetText) {
         appendBubble(userText, "user");
-        chatInputContainer.style.display = "none";
-
-        setTimeout(() => {
-          appendBubble("수고하셨습니다. 모든 시뮬레이션 대화가 안전하게 종료되었습니다.", "bot");
-          
-          setTimeout(() => {
-            alert("시뮬레이션이 종료되었습니다.");
-            // window.location.href = '/result'; 
-          }, 500);
-        }, 800);
-
+        finishSimulation();
       } else {
         alert("문구를 정확히 입력해주세요.\n\n" + TARGET_PHRASE);
       }
