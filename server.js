@@ -20,7 +20,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/images", express.static(path.join(__dirname, "data_generated", "images")));
 
 /** =========================================================
- * 🌟 [핵심] 통계 분석용 엑셀 데이터 분할 함수 (새로 추가됨)
+ * 🌟 [핵심] 통계 분석용 엑셀 데이터 분할 함수 (순서 업데이트됨!)
  * ========================================================= */
 function makeFlatRow(type, timeStr, name, org, scenarioId, dataPayload) {
   // A열 ~ AW열까지 총 49칸의 빈 배열 생성
@@ -42,30 +42,30 @@ function makeFlatRow(type, timeStr, name, org, scenarioId, dataPayload) {
     row[7] = p.career || "";
     row[8] = p.importantPerson || "";
     
-    // BFI 성향 1~10 (J열 ~ S열)
-    for(let j=1; j<=10; j++) row[8+j] = ps.bfi?.[`q${j}`] || "";
-    
-    row[19] = (i.process || []).join(", ");
-    row[20] = i.riskType || "";
-    row[21] = (i.triggers || []).join(", ");
-    row[22] = i.sentence || ""; 
-    row[23] = i.consequence || ""; 
-    row[24] = i.feeling || "";
-    row[25] = (ps.riskBarriers || []).join(", ");
-    row[26] = ps.extraComment || "";
+    // 🌟 위험지각 R1~R3를 BFI보다 앞(J~L열)으로 이동
+    row[9] = ps.attitude?.q13 || ""; 
+    row[10] = ps.attitude?.q14 || ""; 
+    row[11] = ps.attitude?.q15 || "";
 
-    // 사전 위험지각 R1~R3 (AB~AD열)
-    row[27] = ps.attitude?.q13 || ""; 
-    row[28] = ps.attitude?.q14 || ""; 
-    row[29] = ps.attitude?.q15 || "";
+    // BFI 성향 1~10 (M~V열)
+    for(let j=1; j<=10; j++) row[11+j] = ps.bfi?.[`q${j}`] || "";
+    
+    row[22] = (i.process || []).join(", ");
+    row[23] = i.riskType || "";
+    row[24] = (i.triggers || []).join(", ");
+    row[25] = i.sentence || ""; 
+    row[26] = i.consequence || ""; 
+    row[27] = i.feeling || "";
+    row[28] = (ps.riskBarriers || []).join(", ");
+    row[29] = ps.extraComment || "";
 
   } else if (type === "3.사후설문") {
     const d = dataPayload.data || {};
     
-    // 사후 위험지각 R1~R3 (사전점수와 같은 열인 AB~AD열에 위치하여 비교 편하게)
-    row[27] = d.R1 || ""; 
-    row[28] = d.R2 || ""; 
-    row[29] = d.R3 || "";
+    // 🌟 사후 위험지각 R1~R3 (사전점수와 동일한 J~L열에 위치)
+    row[9] = d.R1 || ""; 
+    row[10] = d.R2 || ""; 
+    row[11] = d.R3 || "";
 
     // 사후 경험품질 P1, P2 (AE~AK열)
     row[30] = d.P1_1 || ""; row[31] = d.P1_2 || ""; row[32] = d.P1_3 || "";
@@ -78,7 +78,6 @@ function makeFlatRow(type, timeStr, name, org, scenarioId, dataPayload) {
     for(let j=1; j<=9; j++) row[38+j] = d[`interview_${j}`] || "";
 
   } else if (type.includes("2.리포트생성")) {
-    // 리포트 텍스트는 맨 마지막 열(AW열)에 통째로 저장
     row[48] = dataPayload.reportText || "";
   }
   return row;
