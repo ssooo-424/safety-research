@@ -175,6 +175,25 @@
       chatInputContainer.style.display = "none";
       quickRepliesBox.style.display = "none";
 
+      // ✅ 대화 로그 서버에 저장
+      try {
+        const raw = localStorage.getItem("preSurveyResult");
+        const survey = raw ? JSON.parse(raw) : {};
+        const name = survey.data?.profile?.name || "미확인";
+        const org = survey.data?.profile?.org || "소속불명";
+
+        fetch("/api/save-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name, org, scenarioId, branch, messages
+          })
+        }).then(r => r.json()).then(d => {
+          if (d.ok) console.log("✅ 대화 로그 저장 완료:", d.filename);
+          else console.error("❌ 대화 로그 저장 실패:", d.error);
+        }).catch(e => console.error("❌ 대화 로그 전송 실패:", e));
+      } catch(e) { console.error("대화 로그 저장 오류:", e); }
+
       setTimeout(() => {
         appendBubble("수고하셨습니다. 모든 시뮬레이션 대화가 안전하게 종료되었습니다.", "bot");
         
