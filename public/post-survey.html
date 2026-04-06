@@ -10,7 +10,7 @@
     header { padding: 24px; text-align: center; border-bottom: 1px solid #eee; background: #fff; position: sticky; top: 0; z-index: 10; }
     header h1 { margin: 0; font-size: 1.3rem; color: #333; }
     .content { padding: 20px; flex: 1; }
-    
+
     .section-title { font-size: 1.1rem; font-weight: bold; margin: 30px 0 15px; padding-left: 10px; border-left: 4px solid #ffeb3b; color: #1a1a1a; }
     .question-card { background: #f8f9fa; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #eee; }
     .question-text { font-size: 1rem; color: #333; margin-bottom: 15px; line-height: 1.5; font-weight: 500; }
@@ -18,7 +18,6 @@
     .scale-wrapper { display: flex; justify-content: space-between; align-items: flex-end; gap: 2px; margin-top: 10px; }
     .scale-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
     .scale-item input { display: none; }
-    
     .scale-num {
       width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ddd;
       display: flex; align-items: center; justify-content: center;
@@ -29,8 +28,29 @@
     }
     .scale-label { font-size: 0.65rem; color: #999; margin-bottom: 6px; text-align: center; height: 14px; white-space: nowrap; }
 
+    .slider-group { margin-top: 10px; }
+    .slider-container { position: relative; margin-top: 20px; padding-top: 10px; }
+    .slider-container input[type="range"] {
+      width: 100%; -webkit-appearance: none; appearance: none;
+      height: 8px; border-radius: 4px; background: linear-gradient(to right, #b6e2c4, #4caf50); outline: none;
+    }
+    .slider-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 22px; height: 22px; border-radius: 50%; background: #4caf50; cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .slider-bubble {
+      position: absolute; top: -6px; transform: translateX(-50%);
+      background: #4caf50; color: #fff; font-size: 0.8rem; font-weight: bold;
+      padding: 2px 8px; border-radius: 10px; pointer-events: none;
+      white-space: nowrap; min-width: 28px; text-align: center;
+    }
+    .slider-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+    .emotion-block { border-top: 1px dashed #ddd; padding-top: 14px; margin-top: 14px; }
+    .emotion-block:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+    .emotion-label { font-size: 0.85rem; font-weight: bold; color: #4caf50; margin-bottom: 8px; }
+
     textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: none; box-sizing: border-box; font-family: inherit; margin-top: 8px; font-size: 0.95rem; }
-    .sub-info { font-size: 0.85rem; color: #777; margin-top: -10px; margin-bottom: 10px; padding-left: 5px; }
 
     footer { padding: 20px; border-top: 1px solid #eee; background: #fff; }
     .submit-btn { width: 100%; background: #333; color: #fff; border: none; padding: 18px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
@@ -45,6 +65,8 @@
     </header>
 
     <div class="content">
+
+      <!-- 1. 콘텐츠 경험 품질 (5점) -->
       <div class="section-title">1. 콘텐츠 경험 품질 (5점)</div>
       <div id="q-p1-1" class="question-card"></div>
       <div id="q-p1-2" class="question-card"></div>
@@ -54,52 +76,99 @@
       <div id="q-p2-3" class="question-card"></div>
       <div id="q-p2-4" class="question-card"></div>
 
-      <div class="section-title">2. 사후 위험지각 인식 (7점)</div>
-      <div id="q-r1" class="question-card"></div>
-      <div id="q-r2" class="question-card"></div>
-      <div id="q-r3" class="question-card"></div>
+      <!-- 2. 사고 위험지각 (100점 슬라이더) -->
+      <div class="section-title">2. 사고 위험지각 (100점)</div>
+      <div class="question-card">
+        <div class="question-text">R1. 건설현장에서 발생하는 사고의 피해는 대체로 매우 심각하다고 생각하십니까?</div>
+        <div class="slider-group">
+          <div class="slider-container"><span class="slider-bubble" id="R1_bub">50</span><input type="range" id="R1" min="0" max="100" value="50" step="10" oninput="moveBubble(this)"></div>
+          <div class="slider-labels"><span>전혀 0</span><span>매우 강하게 100</span></div>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="question-text">R2. 나 또한 건설현장에서 사고를 겪을 가능성이 실제로 있다고 생각하십니까?</div>
+        <div class="slider-group">
+          <div class="slider-container"><span class="slider-bubble" id="R2_bub">50</span><input type="range" id="R2" min="0" max="100" value="50" step="10" oninput="moveBubble(this)"></div>
+          <div class="slider-labels"><span>전혀 0</span><span>매우 강하게 100</span></div>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="question-text">R3. 본인이 수행하는 건설 업무 자체가 위험성이 크다고 느끼십니까?</div>
+        <div class="slider-group">
+          <div class="slider-container"><span class="slider-bubble" id="R3_bub">50</span><input type="range" id="R3" min="0" max="100" value="50" step="10" oninput="moveBubble(this)"></div>
+          <div class="slider-labels"><span>전혀 0</span><span>매우 강하게 100</span></div>
+        </div>
+      </div>
 
-      <div class="section-title">3. 감정 반응 확인 (7점)</div>
-      <div id="q-d1" class="question-card"></div>
-      <div id="q-d2" class="question-card"></div>
+      <!-- 3. 사고 대응 의도 (5점) -->
+      <div class="section-title">3. 사고 대응 의도 (5점)</div>
+      <div id="q-c1" class="question-card"></div>
+      <div id="q-i1" class="question-card"></div>
 
-      <div class="section-title">4. POST 인터뷰</div>
+      <!-- 4. 감정 반응 -->
+      <div class="section-title">4. 감정 반응</div>
       <div class="question-card">
-        <div class="question-text">Q1. 현장에서 위험을 알아도 그냥 진행하게 되는 이유가 대부분 뭐라고 생각하시나요?</div>
-        <div class="sub-info">(시간압박/상사/관행/자신감/귀찮음/작업중단 부담/소통 부재 등) [cite: 23]</div>
-        <textarea id="int_1" placeholder="의견을 입력해 주세요..."></textarea>
+        <div style="font-size:0.9rem; color:#666; margin-bottom:10px;">D1. 감정의 정도와 방향을 알려주세요.</div>
+
+        <!-- 두려움 -->
+        <div class="emotion-block">
+          <div class="emotion-label">두려움</div>
+          <div id="q-D1-fear-a"></div>
+          <div class="question-text" style="margin-top:14px; margin-bottom:8px;">D1-b. 그 두려움은 어떻게 작용했나요?</div>
+          <div class="slider-container"><span class="slider-bubble" id="D1_fear_b_bub">50</span><input type="range" id="D1_fear_b" min="0" max="100" value="50" step="10" oninput="moveBubble(this)"></div>
+          <div class="slider-labels"><span>앞으로의 행동을 조심하게 했다.</span><span>콘텐츠 자체를 피하고 싶었다.</span></div>
+        </div>
+
+        <!-- 긴장감 -->
+        <div class="emotion-block">
+          <div class="emotion-label">긴장감</div>
+          <div id="q-D1-tension-a"></div>
+          <div class="question-text" style="margin-top:14px; margin-bottom:8px;">D1-b. 그 긴장감은 어떻게 작용했나요?</div>
+          <div class="slider-container"><span class="slider-bubble" id="D1_tension_b_bub">50</span><input type="range" id="D1_tension_b" min="0" max="100" value="50" step="10" oninput="moveBubble(this)"></div>
+          <div class="slider-labels"><span>앞으로의 작업에 집중하게 할것이다.</span><span>콘텐츠를 보는 것이 심리적으로 부담이 되었다.</span></div>
+        </div>
+
+        <!-- 불편감 -->
+        <div class="emotion-block">
+          <div class="emotion-label">불편감</div>
+          <div id="q-D1-discomfort-a"></div>
+          <div class="question-text" style="margin-top:14px; margin-bottom:8px;">D1-b. 그 불편감은 어떻게 작용했나요?</div>
+          <div class="slider-container"><span class="slider-bubble" id="D1_discomfort_b_bub">50</span><input type="range" id="D1_discomfort_b" min="0" max="100" value="50" step="10" oninput="moveBubble(this)"></div>
+          <div class="slider-labels"><span>사고를 현실적으로 체감하게 했다.</span><span>콘텐츠 내용에 거부감이 들었다.</span></div>
+        </div>
+      </div>
+
+      <!-- D2. 감정 잔상 (7점 리커트) -->
+      <div class="question-card">
+        <div style="font-size:0.9rem; color:#666; margin-bottom:10px;">D2. 감정 잔상</div>
+        <div id="q-D2"></div>
+      </div>
+
+      <!-- 5. 심층 인터뷰 -->
+      <div class="section-title">5. 심층 인터뷰</div>
+      <div class="question-card">
+        <div class="question-text">Q1. 방금 본 콘텐츠에서 가장 기억에 남는 장면이나 문장은 무엇인가요?</div>
+        <textarea id="int_1" placeholder="자유롭게 작성해 주세요..."></textarea>
       </div>
       <div class="question-card">
-        <div class="question-text">Q2. 방금 본 콘텐츠에서 가장 기억에 남는 장면/문장은 무엇인가요? [cite: 23]</div>
-        <textarea id="int_2" placeholder="의견을 입력해 주세요..."></textarea>
+        <div class="question-text">Q2. 그 장면을 볼 때 구체적으로 어떤 감정이 들었나요?</div>
+        <textarea id="int_2" placeholder="자유롭게 작성해 주세요..."></textarea>
       </div>
       <div class="question-card">
-        <div class="question-text">Q3. 그 장면을 볼 때 어떤 감정이 들었나요? [cite: 23]</div>
-        <textarea id="int_3" placeholder="의견을 입력해 주세요..."></textarea>
+        <div class="question-text">Q3. 콘텐츠의 어떤 요소가 경각심을 만드는 데 가장 큰 역할을 했나요?</div>
+        <textarea id="int_3" placeholder="자유롭게 작성해 주세요..."></textarea>
       </div>
       <div class="question-card">
-        <div class="question-text">Q4. 본인 상황과 연결된 부분이 있었나요? [cite: 23]</div>
-        <textarea id="int_4" placeholder="의견을 입력해 주세요..."></textarea>
+        <div class="question-text">Q4. 사고로 인한 손실(신체적, 경제적 등)이 이전과 비교해 어떻게 다르게 느껴졌는지, 구체적으로 어떤 부분에서 그렇게 느꼈는지 말씀해 주세요.</div>
+        <textarea id="int_4" placeholder="자유롭게 작성해 주세요..."></textarea>
       </div>
       <div class="question-card">
-        <div class="question-text">Q5. 경각심을 느끼게 했나요? [cite: 23]</div>
-        <textarea id="int_5" placeholder="의견을 입력해 주세요..."></textarea>
+        <div class="question-text">Q5. 앞으로 실제 작업 중에 오늘 경험한 내용이 떠오른다면, 어떤 순간에 어떤 형태로 떠오를 것 같은지 자유롭게 설명해 주세요.</div>
+        <textarea id="int_5" placeholder="자유롭게 작성해 주세요..."></textarea>
       </div>
       <div class="question-card">
-        <div class="question-text">Q6. 어떤 요소가 경각심을 만들었나요? [cite: 23]</div>
-        <textarea id="int_6" placeholder="의견을 입력해 주세요..."></textarea>
-      </div>
-      <div class="question-card">
-        <div class="question-text">Q7. 사고 손실이 실감나게 느껴졌나요? [cite: 23]</div>
-        <textarea id="int_7" placeholder="의견을 입력해 주세요..."></textarea>
-      </div>
-      <div class="question-card">
-        <div class="question-text">Q8. 앞으로 작업 중에 내용이 떠오를 것 같나요? [cite: 23]</div>
-        <textarea id="int_8" placeholder="의견을 입력해 주세요..."></textarea>
-      </div>
-      <div class="question-card">
-        <div class="question-text">Q9. 안전수칙 준수 의지에 차이가 있나요? [cite: 23]</div>
-        <textarea id="int_9" placeholder="의견을 입력해 주세요..."></textarea>
+        <div class="question-text">Q6. 오늘 경험 이후 안전수칙 준수에 대한 본인의 태도나 의지가 어떻게 달라졌는지, 달라진 점이 있다면 구체적으로 어떤 부분인지 말씀해 주세요.</div>
+        <textarea id="int_6" placeholder="자유롭게 작성해 주세요..."></textarea>
       </div>
     </div>
 
@@ -109,6 +178,24 @@
   </div>
 
   <script>
+    function moveBubble(input) {
+      const bubble = input.parentElement.querySelector('.slider-bubble');
+      const val = input.value;
+      const pct = (val - input.min) / (input.max - input.min);
+      const thumbHalf = 11;
+      const trackW = input.offsetWidth;
+      const px = thumbHalf + pct * (trackW - 2 * thumbHalf);
+      bubble.style.left = px + 'px';
+      bubble.textContent = val;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.slider-container input[type="range"]').forEach(moveBubble);
+    });
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.slider-container input[type="range"]').forEach(moveBubble);
+    });
+
     function createScaleHtml(id, text, max) {
       let html = `<div class="question-text">${text}</div><div class="scale-wrapper">`;
       for (let i = 1; i <= max; i++) {
@@ -124,35 +211,58 @@
       return html;
     }
 
-    // 문항 렌더링 [cite: 17, 19, 21]
-    document.getElementById('q-p1-1').innerHTML = createScaleHtml('P1_1', 'P1-1. 콘텐츠 경험에 정신적으로 몰입했다고 느꼈다.', 5);
-    document.getElementById('q-p1-2').innerHTML = createScaleHtml('P1_2', 'P1-2. 이 경험은 매우 흥미로웠다.', 5);
-    document.getElementById('q-p1-3').innerHTML = createScaleHtml('P1_3', 'P1-3. 이 경험은 나를 완전히 몰입시키며 집중하게 했다.', 5);
-    document.getElementById('q-p2-1').innerHTML = createScaleHtml('P2_1', 'P2-1. 이 콘텐츠가 내 상황/내 작업(현장)에 대해 생각하게 만들었다.', 5);
-    document.getElementById('q-p2-2').innerHTML = createScaleHtml('P2_2', 'P2-2. 콘텐츠 속 일이 실제로 일어난다면 어떨지 생각해 보았는가?', 5);
-    document.getElementById('q-p2-3').innerHTML = createScaleHtml('P2_3', 'P2-3. 이 콘텐츠가 나 개인과 관련 있다고 느꼈는가?', 5);
-    document.getElementById('q-p2-4').innerHTML = createScaleHtml('P2_4', 'P2-4. 콘텐츠를 보면서 내 경험이 떠올랐는가?', 5);
-    document.getElementById('q-r1').innerHTML = createScaleHtml('R1', 'R1. 건설현장 사고의 피해는 대체로 매우 심각하다고 생각한다.', 7);
-    document.getElementById('q-r2').innerHTML = createScaleHtml('R2', 'R2. 나는 건설현장에서 사고를 겪을 가능성이 있다고 생각한다.', 7);
-    document.getElementById('q-r3').innerHTML = createScaleHtml('R3', 'R3. 건설현장에서의 업무는 위험이 크다고 느낀다.', 7);
-    document.getElementById('q-d1').innerHTML = createScaleHtml('D1', 'D1. 콘텐츠가 불편하거나 불쾌하게 느껴졌다.', 7);
-    document.getElementById('q-d2').innerHTML = createScaleHtml('D2', 'D2. 콘텐츠를 본 뒤에도 감정이 남아 있다.', 7);
+    // 1. 콘텐츠 경험 품질 (5점)
+    document.getElementById('q-p1-1').innerHTML = createScaleHtml('P1_1', 'P1-1 : 방금 경험한 콘텐츠에 정신적으로 몰입했다고 느꼈다.', 5);
+    document.getElementById('q-p1-2').innerHTML = createScaleHtml('P1_2', 'P1-2 : 이 콘텐츠를 경험하는 과정이 흥미로웠다.', 5);
+    document.getElementById('q-p1-3').innerHTML = createScaleHtml('P1_3', 'P1-3 : 이 경험은 나를 완전히 몰입시키며 집중하게 했다.', 5);
+    document.getElementById('q-p2-1').innerHTML = createScaleHtml('P2_1', 'P2-1 : 이 콘텐츠가 실제 나의 작업 상황이나 현장에 대해 생각하게 만들었다.', 5);
+    document.getElementById('q-p2-2').innerHTML = createScaleHtml('P2_2', 'P2-2 : 콘텐츠 속 사고가 나에게 실제로 일어난다면 어떨지 구체적으로 상상해 보았다.', 5);
+    document.getElementById('q-p2-3').innerHTML = createScaleHtml('P2_3', 'P2-3 : 이 콘텐츠의 내용이 \'나 개인\'과 밀접한 관련이 있다고 느꼈다.', 5);
+    document.getElementById('q-p2-4').innerHTML = createScaleHtml('P2_4', 'P2-4 : 콘텐츠를 보는 동안 본인의 과거 경험이나 비슷한 현장 사례가 떠올랐다.', 5);
+
+    // 3. 사고 대응 의도 (5점)
+    document.getElementById('q-c1').innerHTML = createScaleHtml('C1', 'C1 : 이번 콘텐츠에서 제안한 안전수칙을 지키는 것이 사고를 예방하는 데 실질적인 효과가 있을 것이라 믿습니까?', 5);
+    document.getElementById('q-i1').innerHTML = createScaleHtml('I1', 'I1 : 앞으로 비슷한 상황이 생기면, 서두르기보다 위험요인을 먼저 확인하거나 작업을 잠시 멈출 의향이 있습니까?', 5);
+
+    // 4. 감정 D1-a (7점 리커트)
+    document.getElementById('q-D1-fear-a').innerHTML = createScaleHtml('D1_fear_a', 'D1-a. 두려움을 얼마나 느꼈나요?', 7);
+    document.getElementById('q-D1-tension-a').innerHTML = createScaleHtml('D1_tension_a', 'D1-a. 긴장감을 얼마나 느꼈나요?', 7);
+    document.getElementById('q-D1-discomfort-a').innerHTML = createScaleHtml('D1_discomfort_a', 'D1-a. 불편감을 얼마나 느꼈나요?', 7);
+
+    // D2 (7점 리커트)
+    document.getElementById('q-D2').innerHTML = createScaleHtml('D2', '이 경험에서 느낀 감정이 콘텐츠가 끝난 후에도 여전히 마음속에 남아있다.', 7);
 
     async function savePostSurvey() {
       const btn = document.getElementById('save-btn');
       const answers = {};
-      const scaleQuestions = ['P1_1', 'P1_2', 'P1_3', 'P2_1', 'P2_2', 'P2_3', 'P2_4', 'R1', 'R2', 'R3', 'D1', 'D2'];
-      
-      for (const q of scaleQuestions) {
+
+      // 5점 척도
+      const scale5 = ['P1_1', 'P1_2', 'P1_3', 'P2_1', 'P2_2', 'P2_3', 'P2_4', 'C1', 'I1'];
+      for (const q of scale5) {
         const selected = document.querySelector(`input[name="${q}"]:checked`);
         if (!selected) { alert('모든 선택 문항에 응답해 주세요.'); return; }
-        answers[q] = selected.value;
+        answers[q] = parseInt(selected.value);
       }
-      for(let i=1; i<=9; i++) {
+
+      // 7점 척도
+      const scale7 = ['D1_fear_a', 'D1_tension_a', 'D1_discomfort_a', 'D2'];
+      for (const q of scale7) {
+        const selected = document.querySelector(`input[name="${q}"]:checked`);
+        if (!selected) { alert('모든 선택 문항에 응답해 주세요.'); return; }
+        answers[q] = parseInt(selected.value);
+      }
+
+      // 슬라이더
+      const sliderIds = ['R1', 'R2', 'R3', 'D1_fear_b', 'D1_tension_b', 'D1_discomfort_b'];
+      for (const id of sliderIds) {
+        answers[id] = parseInt(document.getElementById(id).value);
+      }
+
+      // 인터뷰
+      for (let i = 1; i <= 6; i++) {
         answers[`interview_${i}`] = document.getElementById(`int_${i}`).value;
       }
 
-      // 로컬스토리지 데이터 안전하게 파싱
       let preData = {};
       try {
         preData = JSON.parse(localStorage.getItem("preSurveyResult") || "{}");
@@ -178,7 +288,6 @@
           body: JSON.stringify(payload)
         });
 
-        // ✅ 서버 응답 타입 확인 (핵심 해결 부분)
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const result = await res.json();
@@ -189,7 +298,6 @@
             throw new Error(result.error || "서버에서 저장을 거절했습니다.");
           }
         } else {
-          // 서버가 HTML(404 등)을 보낸 경우
           const errorText = await res.text();
           console.error("서버 응답 오류:", errorText);
           throw new Error("서버 경로(/api/submit-post-survey)가 없거나 서버가 꺼져 있습니다.");
