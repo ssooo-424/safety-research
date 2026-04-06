@@ -58,22 +58,7 @@
       .error { color: #dc3545; font-size: 0.9rem; margin-bottom: 16px; display: none; font-weight: bold; }
       .muted { color: #888; font-size: 0.85rem; margin-top: 4px; }
 
-      /* BFI 스타일 */
-      .bfi-container { display: flex; flex-direction: column; gap: 16px; }
-      .bfi-item { padding: 16px 0; border-bottom: 1px solid #eee; }
-      .bfi-item:last-child { border-bottom: none; }
-      .bfi-q-text { font-weight: 700; font-size: 1.05rem; margin-bottom: 16px; color: #222; }
-      .bfi-scale { display: flex; justify-content: space-between; align-items: center; max-width: 400px; margin: 0 auto; }
-      .bfi-opt-label { display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; width: 48px; }
-      .bfi-opt-label input { position: absolute; opacity: 0; cursor: pointer; }
-      .bfi-circle { width: 40px; height: 40px; border-radius: 50%; background: #f1f3f5; color: #868e96; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; transition: all 0.2s ease; border: 2px solid transparent; }
-      .bfi-desc { font-size: 11px; color: #adb5bd; margin-top: 6px; font-weight: 500; }
-      .bfi-opt-label input:checked + .bfi-circle { background: #007bff; color: #fff; box-shadow: 0 4px 6px rgba(0,123,255,0.3); transform: scale(1.1); }
-      .bfi-opt-label:hover .bfi-circle { background: #e9ecef; }
-      .bfi-opt-label input:checked + .bfi-circle:hover { background: #0069d9; }
-      .bfi-guide { display: flex; justify-content: space-between; font-size: 0.8rem; color: #888; background: #f8f9fa; padding: 10px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eee; }
-      .bfi-header { display: flex; justify-content: space-between; max-width: 400px; margin: 0 auto 10px; font-size: 0.8rem; color: #666; text-align: center; }
-      .bfi-header span { width: 48px; }
+
     </style>
   </head>
   <body>
@@ -203,20 +188,7 @@
       </div>
 
       <div class="step" data-step="3">
-        <h3>3) 성향 파악 (BFI-10)</h3>
-        <div class="card">
-          <div class="muted" style="text-align: center; margin-bottom: 20px;">
-            "평소의 나는..." (솔직하게 체크해 주세요)
-          </div>
-          <div class="bfi-header">
-            <span>전혀<br>아님</span><span>별로</span><span>보통</span><span>다소</span><span>매우<br>그럼</span>
-          </div>
-          <div id="bfiContainer"></div>
-        </div>
-      </div>
-
-      <div class="step" data-step="4">
-        <h3>4) 최근 겪거나 목격한 위험 상황</h3>
+        <h3>3) 최근 겪거나 목격한 위험 상황</h3>
         <div class="card">
           <label>어떤 작업 중이었나요?</label>
           <div class="chips" data-max="1" data-group="process">
@@ -255,8 +227,8 @@
         </div>
       </div>
 
-      <div class="step" data-step="5">
-        <h3>5) 상황 구체화</h3>
+      <div class="step" data-step="4">
+        <h3>4) 상황 구체화</h3>
         <div class="card">
           <label>Q. 직접 경험했거나, 목격했던 건설현장 사고의 구체적인 상황을 묘사해주세요.</label>
           <textarea id="sentence" placeholder="예: 2층 슬라브 끝단에서 작업하는데 안전난간이 잠시 해체되어 있었고, 빨리 하려다 발을 헛디뎠음."></textarea>
@@ -271,8 +243,8 @@
         </div>
       </div>
 
-      <div class="step" data-step="6">
-        <h3>6) 위험 인식 저해 요인</h3>
+      <div class="step" data-step="5">
+        <h3>5) 위험 인식 저해 요인</h3>
         <div class="card">
           <label>건설현장의 위험 인식이 낮은 주요 이유는 뭐라고 생각하시나요? (2개)</label>
           <div class="chips" data-max="2" data-group="lowReason">
@@ -298,40 +270,8 @@
     </form>
     
     <script>
-      const bfiQuestions = [
-        "1. 나는 내향적/조용한 사람이라고 생각한다",
-        "2. 나는 대체로 사람을 잘 믿는 편이다",
-        "3. 나는 게으른 편이다",
-        "4. 나는 침착하고 스트레스를 잘 견딘다",
-        "5. 나는 예술적 관심이 적은 편이다",
-        "6. 나는 사교적이고 외향적이다",
-        "7. 나는 다른 사람의 흠을 잘 찾는 편이다",
-        "8. 나는 일을 꼼꼼하게 해내는 편이다",
-        "9. 나는 긴장을 잘 하는 편이다",
-        "10. 나는 상상력이 풍부한 편이다"
-      ];
-
-      const bfiContainer = document.getElementById('bfiContainer');
-      bfiQuestions.forEach((q, idx) => {
-        const index = idx + 1;
-        const html = `
-          <div class="bfi-item">
-            <div class="bfi-q-text">${q}</div>
-            <div class="bfi-scale">
-              ${[1,2,3,4,5].map(score => `
-                <label class="bfi-opt-label">
-                  <input type="radio" name="bfi_${index}" value="${score}">
-                  <div class="bfi-circle">${score}</div>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-        `;
-        bfiContainer.insertAdjacentHTML('beforeend', html);
-      });
-
       let currentStep = 1;
-      const totalSteps = 6;
+      const totalSteps = 5;
       const prevBtn = document.getElementById('prevBtn');
       const nextBtn = document.getElementById('nextBtn');
       const progressPill = document.getElementById('progressPill');
@@ -382,14 +322,6 @@
         return Array.from(inputs).map(el => el.value);
       }
 
-      function getBfiValues() {
-        const bfi = {};
-        for(let i=1; i<=10; i++) {
-          const el = document.querySelector(`input[name="bfi_${i}"]:checked`);
-          bfi[`q${i}`] = el ? el.value : null;
-        }
-        return bfi;
-      }
 
       function collectFormData() {
         const profile = {
@@ -424,7 +356,6 @@
         const psychology = {
           riskBarriers: getCheckedValues('lowReason'),
           extraComment: document.getElementById('extraComment').value,
-          bfi: getBfiValues(),
           attitude: attitude
         };
 
@@ -513,15 +444,6 @@
              document.getElementById('val_q15').innerText = q15Val;
           }
 
-          if (d.psychology?.bfi) {
-            for(let i=1; i<=10; i++) {
-              const val = d.psychology.bfi[`q${i}`];
-              if(val) {
-                const el = document.querySelector(`input[name="bfi_${i}"][value="${val}"]`);
-                if(el) el.checked = true;
-              }
-            }
-          }
           alert("최근 설문 데이터를 불러왔습니다.");
         } catch (e) {
           console.error(e);
