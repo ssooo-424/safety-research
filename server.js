@@ -2,17 +2,15 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const { OpenAI } = require("openai"); 
-const { google } = require("googleapis"); // 🌟 구글 시트 라이브러리 추가
+const { google } = require("googleapis");
 
 require("dotenv").config();
 
-// 기존 내부 LLM 로직
 const { generateOnce, chatOnce, generateScenarioContext } = require("./llm/generate");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// OpenAI API 초기화
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.use(express.json({ limit: "2mb" }));
@@ -20,65 +18,98 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/images", express.static(path.join(__dirname, "data_generated", "images")));
 
 /** =========================================================
- * 🌟 [핵심] 통계 분석용 엑셀 데이터 분할 함수 (순서 업데이트됨!)
- * ========================================================= */
-function makeFlatRow(type, timeStr, name, org, scenarioId, dataPayload) {
-  // A열 ~ AW열까지 총 49칸의 빈 배열 생성
-  const row = new Array(49).fill("");
+ * 🌟 통계 분석용 엑셀 데이터 분할 함수 (새 사후설문 구조 반영)
+ * =========================================================
+ * 
+ * [컬럼 배치표]
+ * 0  : 시간
+ * 1  : 참가자ID
+ * 2  : 이름
+ * 3  : 유형 (1.사전설문 / 2.리포트생성 / 3.사후설문 / 4.Follow-up)
+ * 4  : 소속
+ * 5  : 시나리오ID
+ * 
+ * --- 사전설문 & 사후설문 공통 ---
+ * 6~9   : 프로필 (직무, 직급, 경력, 중요한사람)
+ * 10~12 : 위험지각 R1, R2, R3
+ * 13~20 : 사고경험 + 심리 (사전설문만)
+ * 
+ * --- 사후설문 전용 ---
+ * 21~27 : 경험품질 P1_1, P1_2, P1_3, P2_1, P2_2, P2_3, P2_4
+ * 28~29 : 사고대응의도 C1, I1
+ * 30~32 : 감정강도(7점) D1_fear_a, D1_tension_a, D1_discomfort_a
+ * 33~35 : 감정방향(슬라이더) D1_fear_b, D1_tension_b, D1_discomfort_b
+ * 36    : 감정잔상(7점) D2
+ * 37~42 : 인터뷰 Q1~Q6
+ * 43    : 원본 JSON 백업
+ */
+function makeFlatRow(type, timeStr, name, org, scenarioId, dataPayload, participantId) {
+  const row = new Array(44).fill("");
   row[0] = timeStr; 
-  row[1] = type; 
+  row[1] = participantId || "";
   row[2] = name; 
-  row[3] = org; 
-  row[4] = scenarioId;
-  row[48] = typeof dataPayload === "string" ? "" : JSON.stringify(dataPayload); // 49번째 칸: 원본 데이터 백업
+  row[3] = type; 
+  row[4] = org; 
+  row[5] = scenarioId;
+  row[43] = typeof dataPayload === "string" ? "" : JSON.stringify(dataPayload);
 
   if (type === "1.사전설문") {
     const p = dataPayload.profile || {};
     const i = dataPayload.incident || {};
     const ps = dataPayload.psychology || {};
     
-    row[5] = (p.jobType || []).join(", ");
-    row[6] = p.position || "";
-    row[7] = p.career || "";
-    row[8] = p.importantPerson || "";
+    row[6] = (p.jobType || []).join(", ");
+    row[7] = p.position || "";
+    row[8] = p.career || "";
+    row[9] = p.importantPerson || "";
     
-    // 🌟 위험지각 R1~R3를 BFI보다 앞(J~L열)으로 이동
-    row[9] = ps.attitude?.q13 || ""; 
-    row[10] = ps.attitude?.q14 || ""; 
-    row[11] = ps.attitude?.q15 || "";
+    row[10] = ps.attitude?.q13 || ""; 
+    row[11] = ps.attitude?.q14 || ""; 
+    row[12] = ps.attitude?.q15 || "";
 
-    // BFI 성향 1~10 (M~V열)
-    for(let j=1; j<=10; j++) row[11+j] = ps.bfi?.[`q${j}`] || "";
-    
-    row[22] = (i.process || []).join(", ");
-    row[23] = i.riskType || "";
-    row[24] = (i.triggers || []).join(", ");
-    row[25] = i.sentence || ""; 
-    row[26] = i.consequence || ""; 
-    row[27] = i.feeling || "";
-    row[28] = (ps.riskBarriers || []).join(", ");
-    row[29] = ps.extraComment || "";
+    row[13] = (i.process || []).join(", ");
+    row[14] = i.riskType || "";
+    row[15] = (i.triggers || []).join(", ");
+    row[16] = i.sentence || ""; 
+    row[17] = i.consequence || ""; 
+    row[18] = i.feeling || "";
+    row[19] = (ps.riskBarriers || []).join(", ");
+    row[20] = ps.extraComment || "";
 
   } else if (type === "3.사후설문") {
     const d = dataPayload.data || {};
     
-    // 🌟 사후 위험지각 R1~R3 (사전점수와 동일한 J~L열에 위치)
-    row[9] = d.R1 || ""; 
-    row[10] = d.R2 || ""; 
-    row[11] = d.R3 || "";
+    // 위험지각 R1~R3 (슬라이더 0~100)
+    row[10] = d.R1 ?? ""; 
+    row[11] = d.R2 ?? ""; 
+    row[12] = d.R3 ?? "";
 
-    // 사후 경험품질 P1, P2 (AE~AK열)
-    row[30] = d.P1_1 || ""; row[31] = d.P1_2 || ""; row[32] = d.P1_3 || "";
-    row[33] = d.P2_1 || ""; row[34] = d.P2_2 || ""; row[35] = d.P2_3 || ""; row[36] = d.P2_4 || "";
+    // 경험품질 P1, P2 (5점 척도)
+    row[21] = d.P1_1 ?? ""; row[22] = d.P1_2 ?? ""; row[23] = d.P1_3 ?? "";
+    row[24] = d.P2_1 ?? ""; row[25] = d.P2_2 ?? ""; row[26] = d.P2_3 ?? ""; row[27] = d.P2_4 ?? "";
     
-    // 감정 반응 D1, D2 (AL~AM열)
-    row[37] = d.D1 || ""; row[38] = d.D2 || "";
+    // 사고 대응 의도 (5점 척도)
+    row[28] = d.C1 ?? ""; 
+    row[29] = d.I1 ?? "";
     
-    // POST 인터뷰 1~9 (AN~AV열)
-    for(let j=1; j<=9; j++) row[38+j] = d[`interview_${j}`] || "";
+    // 감정 강도 D1-a (7점 리커트)
+    row[30] = d.D1_fear_a ?? "";
+    row[31] = d.D1_tension_a ?? "";
+    row[32] = d.D1_discomfort_a ?? "";
+
+    // 감정 방향 D1-b (슬라이더 0~100)
+    row[33] = d.D1_fear_b ?? "";
+    row[34] = d.D1_tension_b ?? "";
+    row[35] = d.D1_discomfort_b ?? "";
+
+    // 감정 잔상 D2 (7점 리커트)
+    row[36] = d.D2 ?? "";
+
+    // 심층 인터뷰 Q1~Q6
+    for(let j=1; j<=6; j++) row[36+j] = d[`interview_${j}`] || "";
 
   } else if (type.includes("2.리포트생성")) {
-    row[48] = dataPayload.reportText || "";
+    row[43] = dataPayload.reportText || "";
   }
   return row;
 }
@@ -88,10 +119,8 @@ function makeFlatRow(type, timeStr, name, org, scenarioId, dataPayload) {
  * ========================================================= */
 async function appendToGoogleSheet(values) {
   try {
-    // Render 환경 변수가 세팅되어 있지 않으면 작동하지 않고 넘어감
     if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.GOOGLE_SHEET_ID) return;
     
-    // 환경변수에 넣은 JSON 키를 파싱해서 구글 인증
     const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
     const auth = new google.auth.GoogleAuth({
       credentials,
@@ -100,7 +129,6 @@ async function appendToGoogleSheet(values) {
     
     const sheets = google.sheets({ version: "v4", auth });
     
-    // 시트의 빈 줄(A1부터)을 찾아 자동으로 데이터를 한 줄 추가함
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: "A1", 
@@ -163,14 +191,14 @@ function writeJson(dir, filename, obj) {
  * 라우트 및 API 설정
  * ========================================================= */
 
-// 🌟 주소창에 아무것도 안 쳤을 때 index.html 띄우기
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-
 app.get("/next", (req, res) => res.sendFile(path.join(__dirname, "public", "next.html")));
 app.get("/choice", (req, res) => res.sendFile(path.join(__dirname, "public", "choice.html")));
 app.get("/c1", (req, res) => res.sendFile(path.join(__dirname, "public", "c1.html")));
 app.get("/c2", (req, res) => res.sendFile(path.join(__dirname, "public", "c2.html")));
 app.get("/c3", (req, res) => res.sendFile(path.join(__dirname, "public", "c3.html")));
+
+app.get("/followup", (req, res) => res.sendFile(path.join(__dirname, "public", "followup.html")));
 
 /** 1) 사전 설문 제출 저장 */
 app.post("/api/submit", (req, res) => {
@@ -182,15 +210,16 @@ app.post("/api/submit", (req, res) => {
   ensureDir(dataDir);
   const name = safeFilename(payload?.profile?.name || "noname");
   const org = safeFilename(payload?.profile?.org || "noorg");
+  const participantId = payload?.participantId || "";
   const filename = `${name}_${org}_${stamp()}.json`;
 
-  const record = { ok: true, scenarioId, condition: null, receivedAt: new Date().toISOString(), data: payload };
+  const record = { ok: true, scenarioId, participantId, condition: null, receivedAt: new Date().toISOString(), data: payload };
   writeJson(dataDir, filename, record);
   console.log("saved:", filename);
 
-  // 🌟 구글 시트로 데이터 쏘기 (분할 로직 적용)
   const timeStr = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
-  const flatRow = makeFlatRow("1.사전설문", timeStr, name, org, scenarioId, payload);
+  const displayName = name;
+  const flatRow = makeFlatRow("1.사전설문", timeStr, displayName, org, scenarioId, payload, participantId);
   appendToGoogleSheet(flatRow);
 
   return res.json({ ...record, savedAs: filename });
@@ -208,15 +237,91 @@ app.post("/api/submit-post-survey", (req, res) => {
     fs.writeFileSync(path.join(surveyDir, filename), JSON.stringify(payload, null, 2), "utf-8");
     console.log(`✅ [사후설문] 저장 완료: ${filename}`);
 
-    // 🌟 구글 시트로 데이터 쏘기 (분할 로직 적용)
     const timeStr = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
-    const flatRow = makeFlatRow("3.사후설문", timeStr, name, org, "", payload);
+    const flatRow = makeFlatRow("3.사후설문", timeStr, name, org, "", payload, payload.participantId || "");
     appendToGoogleSheet(flatRow);
 
     return res.json({ ok: true, filename: filename, message: "사후 설문 데이터가 정상적으로 저장되었습니다." });
   } catch (e) {
     console.error("❌ 사후 설문 저장 실패:", e);
     return res.status(500).json({ ok: false, error: e.message || "서버 저장 중 오류 발생" });
+  }
+});
+
+/** 1-3) Follow-up 설문 저장 */
+app.post("/api/submit-followup", (req, res) => {
+  try {
+    const payload = req.body;
+    const participantId = payload.participantId || "미확인";
+    const followupDir = path.join(__dirname, "followup");
+    ensureDir(followupDir);
+    const filename = `followup_${safeFilename(participantId)}_${stamp()}.json`;
+    fs.writeFileSync(path.join(followupDir, filename), JSON.stringify(payload, null, 2), "utf-8");
+    console.log(`✅ [Follow-up] 저장 완료: ${filename}`);
+
+    // 구글 시트 전송
+    const timeStr = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+    const d = payload.data || {};
+    const row = new Array(44).fill("");
+    row[0] = timeStr;
+    row[1] = participantId;
+    row[2] = "";
+    row[3] = "4.Follow-up";
+    row[4] = "";
+    row[5] = "";
+    row[10] = d.R1 ?? "";
+    row[11] = d.R2 ?? "";
+    row[12] = d.R3 ?? "";
+    row[37] = d.fq_1 || "";
+    row[38] = d.fq_2 || "";
+    row[39] = d.fq_3 || "";
+    row[40] = d.fq_4 || "";
+    row[43] = JSON.stringify(payload);
+    appendToGoogleSheet(row);
+
+    return res.json({ ok: true, filename });
+  } catch (e) {
+    console.error("❌ Follow-up 저장 실패:", e);
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/** 1-4) C3 대화 로그 저장 */
+app.post("/api/save-chat", (req, res) => {
+  try {
+    const { name: rawName, org: rawOrg, scenarioId, branch, messages } = req.body;
+    const name = safeFilename(rawName || "미확인");
+    const org = safeFilename(rawOrg || "소속불명");
+    const chatDir = path.join(__dirname, "chat_logs");
+    ensureDir(chatDir);
+    const filename = `chat_${name}_${org}_${stamp()}.json`;
+    
+    const record = {
+      name, org, scenarioId, branch,
+      messageCount: (messages || []).length,
+      messages: messages || [],
+      savedAt: new Date().toISOString()
+    };
+    fs.writeFileSync(path.join(chatDir, filename), JSON.stringify(record, null, 2), "utf-8");
+    console.log(`✅ [C3 대화로그] 저장 완료: ${filename}`);
+
+    // 구글 시트 전송: 대화 내용을 한 셀에 줄바꿈으로 합쳐서 저장
+    const timeStr = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+    const chatLog = (messages || []).map(m => `[${m.role}] ${m.text || m.content || ""}`).join("\n");
+    const row = new Array(44).fill("");
+    row[0] = timeStr;
+    row[1] = "";
+    row[2] = name;
+    row[3] = "2.C3대화로그";
+    row[4] = org;
+    row[5] = scenarioId || "";
+    row[43] = chatLog;
+    appendToGoogleSheet(row);
+
+    return res.json({ ok: true, filename });
+  } catch (e) {
+    console.error("❌ C3 대화 로그 저장 실패:", e);
+    return res.status(500).json({ ok: false, error: e.message });
   }
 });
 
@@ -285,11 +390,10 @@ ${selectedCase.textContent}
     writeJson(genDir, outName, record);
     console.log("generated:", outName);
 
-    // 🌟 구글 시트로 데이터 쏘기 (분할 로직 적용)
     const timeStr = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
-    const name = payload?.profile?.name || "미상";
-    const org = payload?.profile?.org || "미상";
-    const flatRow = makeFlatRow(`2.리포트생성(${condition})`, timeStr, name, org, scenarioId, { reportText: text });
+    const pname = payload?.profile?.name || "미상";
+    const porg = payload?.profile?.org || "미상";
+    const flatRow = makeFlatRow(`2.리포트생성(${condition})`, timeStr, pname, porg, scenarioId, { reportText: text }, payload?.participantId || "");
     appendToGoogleSheet(flatRow);
 
     return res.json({ ok: true, text, savedAs: outName, imagePath });
