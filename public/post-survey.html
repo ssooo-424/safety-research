@@ -270,9 +270,10 @@
 
       const name = preData.data?.profile?.name || "Unknown";
       const org = preData.data?.profile?.org || "None";
+      const participantId = preData.participantId || localStorage.getItem("participantId") || "";
 
       const payload = {
-        name, org,
+        name, org, participantId,
         surveyType: "POST_SURVEY",
         data: answers,
         timestamp: new Date().toISOString()
